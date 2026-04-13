@@ -157,9 +157,7 @@
     </style>
 </head>
 
-<body class="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-200 to-teal-200 relative overflow-x-hidden">
-
-    <!-- Bubble Background -->
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-sky-200 via-cyan-200 to-teal-200 relative overflow-x-hidden">    <!-- Bubble Background -->
     <div id="bubble-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
     <!-- Wave Background -->
@@ -172,9 +170,10 @@
     </div>
 
     <!-- Header -->
-    <header class="relative z-20 flex justify-between items-center px-6 py-5 max-w-7xl mx-auto">
-        <div class="flex items-center gap-3 group cursor-pointer transition-all duration-300">
-            <i class="fas fa-water text-3xl text-cyan-700 group-hover:text-cyan-800 transition-all drop-shadow-md"></i>
+<header class="relative z-20 flex justify-between items-center w-full max-w-7xl mx-auto px-6 py-5">        <div class="flex items-center gap-3 group cursor-pointer transition-all duration-300">
+<img src="{{ asset('images/Logo.png') }}" 
+     alt="AquaWatch Logo"
+     class="h-10 w-auto drop-shadow-md">
             <h1 class="text-2xl font-black bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquaWatch</h1>
             <span class="ml-2 text-xs bg-white/40 backdrop-blur-sm px-3 py-1 rounded-full text-blue-700">
                 <i class="fas fa-chart-line text-xs"></i> LIVE
@@ -192,9 +191,15 @@
                 <button id="profileButton"
                         type="button"
                         class="flex items-center gap-3 bg-white/80 hover:bg-white px-3 py-2 rounded-2xl shadow border border-white/70 transition">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-300 to-slate-500 flex items-center justify-center text-white font-bold overflow-hidden">
-                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                    </div>
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-300 to-slate-500 flex items-center justify-center text-white font-bold overflow-hidden">
+    @if(Auth::user()->profile && Auth::user()->profile->photo)
+        <img src="{{ asset('storage/' . Auth::user()->profile->photo) }}"
+             alt="Profile Photo"
+             class="w-full h-full object-cover">
+    @else
+        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+    @endif
+</div>
 
                     <div class="hidden sm:block text-left">
                         <div class="text-sm font-semibold text-slate-800 leading-tight">{{ Auth::user()->name }}</div>
@@ -237,8 +242,7 @@
     </header>
 
     <!-- Main -->
-    <main class="relative z-10 max-w-7xl mx-auto px-6 py-6 pb-20">
-
+<main class="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 pb-20">
         <!-- Welcome Banner -->
         <div class="mb-8">
             <div class="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-sm rounded-2xl p-6 border border-white/50">
@@ -299,7 +303,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
             <!-- Rain Display -->
-            <a href="#" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
+            <a href="contents/rain-display" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
                 <div class="flex items-start justify-between mb-4">
                     <div class="text-5xl group-hover:scale-110 transition-transform duration-300">🌧️</div>
                     <div class="bg-cyan-100/80 rounded-full px-3 py-1 text-xs text-cyan-700">
@@ -318,7 +322,7 @@
             </a>
 
             <!-- Flood Display -->
-            <a href="#" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
+            <a href="contents/flood-display" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
                 <div class="flex items-start justify-between mb-4">
                     <div class="text-5xl group-hover:scale-110 transition-transform duration-300">🌊</div>
                     <div class="bg-blue-100/80 rounded-full px-3 py-1 text-xs text-blue-700">
@@ -337,7 +341,7 @@
             </a>
 
             <!-- Flow Display -->
-            <a href="#" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
+            <a href="contents/flow-display" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
                 <div class="flex items-start justify-between mb-4">
                     <div class="text-5xl group-hover:scale-110 transition-transform duration-300">💧</div>
                     <div class="bg-emerald-100/80 rounded-full px-3 py-1 text-xs text-emerald-700">
@@ -356,11 +360,11 @@
             </a>
 
             <!-- Graph Display -->
-            <div class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300">
+            <a href="contents/graph-display" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
                 <div class="flex items-start justify-between mb-4">
-                    <div class="text-5xl float-icon">📈</div>
+                    <div class="text-5xl group-hover:scale-110 transition-transform duration-300">📈</div>
                     <div class="bg-purple-100/80 rounded-full px-3 py-1 text-xs text-purple-700">
-                        <i class="fas fa-chart-line"></i> 24h Trend
+                        24h Trend
                     </div>
                 </div>
                 <h3 class="text-2xl font-bold text-blue-900 mb-2">Graph Display</h3>
@@ -368,10 +372,8 @@
                 <div class="chart-container">
                     <canvas id="waterChart" width="400" height="200" style="max-height: 180px; width: 100%"></canvas>
                 </div>
-                <div class="mt-3 text-center text-xs text-blue-600">
-                    <i class="fas fa-chart-simple"></i> Last 12 hours data | Auto-updates
-                </div>
-            </div>
+            </a>
+
         </div>
 
         <!-- Alerts -->
@@ -656,18 +658,6 @@
             });
         });
 
-        // ========== WELCOME TOAST ==========
-        setTimeout(() => {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-6 right-6 bg-blue-800/90 backdrop-blur-md text-white px-5 py-3 rounded-xl shadow-xl z-50 flex items-center gap-2 text-sm transition-all duration-500';
-            toast.innerHTML = `<i class="fas fa-chart-line text-cyan-300"></i><span>Dashboard live — monitoring ${Math.round(flowRate)} L/s flow</span>`;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 4000);
-        }, 1500);
 
         console.log('🌊 AquaWatch Dashboard — Real-time monitoring active');
     </script>

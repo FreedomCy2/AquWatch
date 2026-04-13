@@ -164,7 +164,9 @@
     <!-- Header with interactive menu -->
     <header class="relative z-20 w-full max-w-6xl mx-auto flex justify-between items-center py-6 px-6 md:px-8">
         <div class="flex items-center gap-2 group cursor-pointer transition-all duration-300 hover:scale-105">
-            <i class="fas fa-water text-3xl text-cyan-700 group-hover:text-cyan-800 transition-all drop-shadow-md"></i>
+<img src="{{ asset('images/Logo.png') }}" 
+     alt="AquaWatch Logo"
+     class="h-10 w-auto drop-shadow-md">
             <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquaWatch</h1>
         </div>
         
@@ -201,7 +203,7 @@
                 <!-- Animated Logo with pulse effect -->
                 <div class="relative flex justify-center mb-6 group">
                     <div class="absolute inset-0 bg-blue-400/20 rounded-full blur-xl scale-110 group-hover:scale-125 transition-transform duration-700"></div>
-                    <img src="{{ asset('images/Logo.jpeg') }}" 
+                    <img src="{{ asset('images/logo.png') }}" 
                          alt="AquaWatch Logo"
                          class="relative w-36 h-36 md:w-40 md:h-40 object-contain rounded-2xl shadow-2xl border-4 border-white/60 transition-all duration-500 group-hover:rotate-2 group-hover:scale-105">
                 </div>
