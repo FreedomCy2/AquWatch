@@ -11,7 +11,7 @@ use App\Http\Controllers\SettingsController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
 Route::view('/plans', 'plans')->name('plans');
 
