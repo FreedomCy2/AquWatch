@@ -79,7 +79,7 @@
                     Back to Dashboard
                 </a>
 
-                <a href="{{ route('profile.edit') }}"
+                <a href="{{ route('profile.legacy.edit') }}"
                    class="px-5 py-2.5 bg-cyan-600 text-white rounded-xl shadow hover:bg-cyan-700 transition">
                     Edit Profile
                 </a>

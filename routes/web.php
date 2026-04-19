@@ -19,8 +19,8 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+        Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.legacy.edit');
+        Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.legacy.update');
         Route::get('/account/settings', [SettingsController::class, 'edit'])->name('account.settings.edit');
         Route::post('/account/settings', [SettingsController::class, 'update'])->name('account.settings.update');
 
