@@ -9,6 +9,28 @@ use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
+    private const DISTRICTS = [
+        'Brunei-Muara',
+        'Belait',
+        'Tutong',
+        'Temburong',
+    ];
+
+    private const ROLES = [
+        'owner',
+        'responder',
+        'viewer',
+    ];
+
+    private const LANGUAGES = [
+        'en',
+        'ms',
+    ];
+
+    private const TIMEZONES = [
+        'Asia/Brunei',
+    ];
+
     public function show()
     {
         $user = Auth::user();
@@ -22,7 +44,14 @@ class ProfileController extends Controller
         $user = Auth::user();
         $profile = $user->profile ?: new Profile();
 
-        return view('profile-edit', compact('user', 'profile'));
+        return view('profile-edit', [
+            'user' => $user,
+            'profile' => $profile,
+            'districts' => self::DISTRICTS,
+            'roles' => self::ROLES,
+            'languages' => self::LANGUAGES,
+            'timezones' => self::TIMEZONES,
+        ]);
     }
 
     public function update(Request $request)
@@ -37,7 +66,7 @@ class ProfileController extends Controller
                 'max:255',
                 Rule::unique('users')->ignore($user->id),
             ],
-            'timezone' => ['nullable', 'string', 'max:100'],
+            'timezone' => ['nullable', Rule::in(self::TIMEZONES)],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
 
             'phone' => ['nullable', 'string', 'max:50'],
@@ -46,6 +75,12 @@ class ProfileController extends Controller
             'city' => ['nullable', 'string', 'max:255'],
             'country' => ['nullable', 'string', 'max:255'],
             'birth_date' => ['nullable', 'date'],
+            'role' => ['nullable', Rule::in(self::ROLES)],
+            'preferred_language' => ['nullable', Rule::in(self::LANGUAGES)],
+            'district' => ['nullable', Rule::in(self::DISTRICTS)],
+            'mukim' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'company' => ['nullable', 'string', 'max:255'],
             'job_title' => ['nullable', 'string', 'max:255'],
             'website' => ['nullable', 'string', 'max:255'],
@@ -57,7 +92,7 @@ class ProfileController extends Controller
         // Update users table
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->timezone = $request->timezone;
+        $user->timezone = $request->timezone ?: 'Asia/Brunei';
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
@@ -80,8 +115,14 @@ class ProfileController extends Controller
                 'bio' => $request->bio,
                 'address' => $request->address,
                 'city' => $request->city,
-                'country' => $request->country,
+                'country' => $request->country ?: 'Brunei Darussalam',
                 'birth_date' => $request->birth_date,
+                'role' => $request->role,
+                'preferred_language' => $request->preferred_language,
+                'district' => $request->district,
+                'mukim' => $request->mukim,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
                 'company' => $request->company,
                 'job_title' => $request->job_title,
                 'website' => $request->website,

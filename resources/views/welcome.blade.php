@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AquaWatch | Intelligent Water Monitoring</title>
+    <title>AquWatch | Intelligent Water Monitoring</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -165,13 +165,17 @@
     <header class="relative z-20 w-full max-w-6xl mx-auto flex justify-between items-center py-6 px-6 md:px-8">
         <div class="flex items-center gap-2 group cursor-pointer transition-all duration-300 hover:scale-105">
 <img src="{{ asset('images/Logo.png') }}" 
-     alt="AquaWatch Logo"
+     alt="AquWatch Logo"
      class="h-10 w-auto drop-shadow-md">
-            <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquaWatch</h1>
+            <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquWatch</h1>
         </div>
         
         @if (Route::has('login'))
             <nav class="flex items-center gap-3 md:gap-5">
+                <a href="{{ route('plans') }}"
+                   class="ripple-effect px-5 py-2.5 bg-white/70 backdrop-blur-sm text-blue-800 border border-blue-300 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300 font-medium flex items-center gap-2">
+                    <i class="fas fa-crown"></i> Upgrade
+                </a>
                 @auth
                     <a href="{{ route('dashboard') }}"
                        class="ripple-effect px-5 py-2.5 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-xl shadow-lg hover:from-blue-700 hover:to-teal-700 transition-all duration-300 font-medium flex items-center gap-2">
@@ -204,14 +208,14 @@
                 <div class="relative flex justify-center mb-6 group">
                     <div class="absolute inset-0 bg-blue-400/20 rounded-full blur-xl scale-110 group-hover:scale-125 transition-transform duration-700"></div>
                     <img src="{{ asset('images/logo.png') }}" 
-                         alt="AquaWatch Logo"
+                         alt="AquWatch Logo"
                          class="relative w-36 h-36 md:w-40 md:h-40 object-contain rounded-2xl shadow-2xl border-4 border-white/60 transition-all duration-500 group-hover:rotate-2 group-hover:scale-105">
                 </div>
                 
                 <!-- Title with dynamic typing effect -->
                 <div class="mb-4">
                     <h2 class="text-4xl md:text-6xl font-black bg-gradient-to-r from-blue-900 via-cyan-800 to-teal-800 bg-clip-text text-transparent tracking-tight">
-                        Welcome to AquaWatch
+                        Welcome to AquWatch
                     </h2>
                     <div class="h-2 w-24 bg-gradient-to-r from-cyan-400 to-blue-500 mx-auto rounded-full mt-3 animate-pulse"></div>
                 </div>
@@ -236,6 +240,12 @@
                 @guest
                     <!-- Interactive call to action buttons with icons and micro-interactions -->
                     <div class="flex justify-center gap-5 flex-wrap">
+                        <a href="{{ route('plans') }}"
+                           class="group px-8 py-4 bg-white/90 backdrop-blur-sm text-blue-800 border-2 border-blue-300 rounded-2xl shadow-xl hover:shadow-2xl hover:border-teal-400 transition-all duration-300 font-bold text-lg flex items-center gap-3">
+                            <i class="fas fa-crown text-amber-500 group-hover:scale-110 transition-transform"></i>
+                            View Plans
+                        </a>
+
                         <a href="{{ route('dashboard') }}"
                            class="glow-button group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 font-bold text-lg flex items-center gap-3 overflow-hidden">
                             <i class="fas fa-water group-hover:animate-wiggle text-xl"></i>
@@ -320,7 +330,7 @@
             <a href="#" class="hover:text-cyan-800 transition-colors duration-200"><i class="fab fa-linkedin"></i></a>
             <a href="#" class="hover:text-cyan-800 transition-colors duration-200"><i class="fab fa-github"></i></a>
         </div>
-        <p>© 2025 AquaWatch — Intelligent Ocean Conservation · <span class="inline-flex items-center"><i class="fas fa-heart text-rose-400 text-xs mx-1"></i> protect our waves</span></p>
+        <p>© 2025 AquWatch — Intelligent Ocean Conservation · <span class="inline-flex items-center"><i class="fas fa-heart text-rose-400 text-xs mx-1"></i> protect our waves</span></p>
     </footer>
     
     <script>
@@ -421,7 +431,7 @@
         };
         
         // Add floating effect to logo on hover + interactive card stat simulation
-        const logoImg = document.querySelector('img[alt="AquaWatch Logo"]');
+        const logoImg = document.querySelector('img[alt="AquWatch Logo"]');
         if (logoImg) {
             logoImg.addEventListener('mouseenter', () => {
                 logoImg.style.filter = 'drop-shadow(0 10px 18px rgba(0,150,180,0.5))';
@@ -465,7 +475,7 @@
         });
         
         // live water quality mini interactive
-        console.log('🌊 AquaWatch interactive ocean theme active — realtime bubbles & stats');
+        console.log('🌊 AquWatch interactive ocean theme active — realtime bubbles & stats');
     </script>
     
     <!-- Additional inline style for custom animation wiggle -->

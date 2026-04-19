@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Dashboard - AquaWatch | Ocean Intelligence</title>    
+    <title>Graph Display - AquWatch</title>
   
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,16 +47,18 @@
             0% { transform: translateY(0); opacity: 0.7; }
             100% { transform: translateY(-100vh); opacity: 0; }
         }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.32);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+        }
     </style>
 </head>
 
-<!-- ✅ FIXED BODY -->
 <body class="min-h-screen flex flex-col bg-gradient-to-br from-sky-200 via-cyan-200 to-teal-200 relative overflow-x-hidden">
-
-    <!-- Bubble Background -->
     <div id="bubble-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
-    <!-- Wave Background -->
     <div class="wave-bg">
         <svg class="wave-svg" viewBox="0 0 1440 320">
             <path fill="#4fc3f7" fill-opacity="0.7"
@@ -65,16 +67,75 @@
         </svg>
     </div>
 
-    <!-- ✅ MAIN CONTENT (IMPORTANT) -->
-    <main class="flex-grow relative z-10 p-6">
-        <!-- You can put your dashboard content here -->
-        <div class="text-center text-blue-900 mt-10">
-            <h1 class="text-3xl font-bold">Graph Display</h1>
-            <p class="text-sm opacity-70">Your content goes here</p>
+    <main class="flex-grow relative z-10 p-5 md:p-8">
+        <div class="mx-auto max-w-6xl space-y-6">
+            <div class="glass-card rounded-3xl p-5 md:p-7 shadow-xl">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-cyan-950">Graph Display</h1>
+                        <p class="text-cyan-900/80 mt-1">Simple flow, rain, and flood trend view for quick decisions</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-xl bg-cyan-700 text-white hover:bg-cyan-800 transition">
+                            Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-4 shadow-lg">
+                <p class="text-xs uppercase tracking-wide text-cyan-900/70 mb-3">Sensor Categories</p>
+                <div class="flex flex-wrap gap-2">
+                    <a href="#flow-graph-section" class="px-4 py-2 rounded-xl bg-cyan-700 text-white hover:bg-cyan-800 transition sensor-nav-link">
+                        <i class="fas fa-tint mr-1"></i> Flow Sensor Graph
+                    </a>
+                    <a href="#rain-graph-section" class="px-4 py-2 rounded-xl bg-white/70 text-cyan-900 hover:bg-white transition sensor-nav-link">
+                        <i class="fas fa-cloud-rain mr-1"></i> Rain Sensor Graph
+                    </a>
+                    <a href="#flood-graph-section" class="px-4 py-2 rounded-xl bg-white/70 text-cyan-900 hover:bg-white transition sensor-nav-link">
+                        <i class="fas fa-water mr-1"></i> Flood Sensor Graph
+                    </a>
+                </div>
+            </div>
+
+            <div id="flow-graph-section" class="glass-card rounded-3xl p-4 md:p-6 shadow-xl scroll-mt-24">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-xl font-bold text-cyan-950">Flow Trend</h2>
+                    <div class="flex gap-2">
+                        <button id="btn-hour" class="px-3 py-1.5 rounded-lg bg-cyan-700 text-white text-sm">Last 1 hour</button>
+                        <button id="btn-day" class="px-3 py-1.5 rounded-lg bg-white/70 text-cyan-900 text-sm">Last 24 hours</button>
+                    </div>
+                </div>
+                <div class="h-80 md:h-96">
+                    <canvas id="flowTrendChart"></canvas>
+                </div>
+                <p id="live-status" class="mt-4 text-sm text-cyan-900/80">Live: updating every 5 seconds</p>
+            </div>
+
+            <div id="rain-graph-section" class="glass-card rounded-3xl p-4 md:p-6 shadow-xl scroll-mt-24">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-xl font-bold text-cyan-950">Rain Condition Trend</h2>
+                    <div class="text-sm text-cyan-900/80">Uses same time range buttons above</div>
+                </div>
+                <div class="h-80 md:h-96">
+                    <canvas id="rainTrendChart"></canvas>
+                </div>
+                <p id="rain-live-status" class="mt-4 text-sm text-cyan-900/80">Live: updating every 5 seconds</p>
+            </div>
+
+            <div id="flood-graph-section" class="glass-card rounded-3xl p-4 md:p-6 shadow-xl scroll-mt-24">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 class="text-xl font-bold text-cyan-950">Flood Status Trend</h2>
+                    <div class="text-sm text-cyan-900/80">Uses same time range buttons above</div>
+                </div>
+                <div class="h-80 md:h-96">
+                    <canvas id="floodTrendChart"></canvas>
+                </div>
+                <p id="flood-live-status" class="mt-4 text-sm text-cyan-900/80">Live: updating every 5 seconds</p>
+            </div>
         </div>
     </main>
 
-    <!-- ✅ FIXED FOOTER -->
     <footer class="mt-auto relative z-10 text-center text-blue-800/80 py-5 text-sm backdrop-blur-sm bg-white/20 border-t border-white/40">
         <div class="flex justify-center gap-6 mb-2">
             <a href="#" class="hover:text-cyan-800 transition"><i class="fab fa-twitter"></i></a>
@@ -83,12 +144,331 @@
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>
-            © {{ date('Y') }} AquaWatch — Protecting our waters
+            © {{ date('Y') }} AquWatch — Protecting our waters
         </p>
     </footer>
 
     <script>
-        // ---------- INTERACTIVE BUBBLE GENERATION (ocean vibe) ----------
+        document.documentElement.style.scrollBehavior = 'smooth';
+
+        const initialPayload = @json($initialPayload);
+        const dataUrl = @json(route('contents.graph-display.data'));
+
+        let currentMode = 'hour';
+
+        const chartContext = document.getElementById('flowTrendChart').getContext('2d');
+        const flowTrendChart = new Chart(chartContext, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Flow (L/min)',
+                        data: [],
+                        borderColor: '#0f766e',
+                        backgroundColor: 'rgba(15, 118, 110, 0.20)',
+                        borderWidth: 3,
+                        pointRadius: 1.5,
+                        fill: true,
+                        tension: 0.30,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: { color: '#0f172a' },
+                        grid: { color: 'rgba(15, 23, 42, 0.12)' },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#0f172a' },
+                        grid: { color: 'rgba(15, 23, 42, 0.12)' },
+                    },
+                },
+                plugins: {
+                    legend: { labels: { color: '#083344' } },
+                },
+            },
+        });
+
+        const rainChartContext = document.getElementById('rainTrendChart').getContext('2d');
+        const rainSeverityBandsPlugin = {
+            id: 'rainSeverityBands',
+            beforeDraw(chart) {
+                const yScale = chart?.scales?.y;
+                const xScale = chart?.scales?.x;
+
+                if (!yScale || !xScale) {
+                    return;
+                }
+
+                const bands = [
+                    { start: 0, end: 1, color: 'rgba(56, 189, 248, 0.12)' },
+                    { start: 1, end: 2, color: 'rgba(59, 130, 246, 0.14)' },
+                ];
+
+                const left = xScale.left;
+                const right = xScale.right;
+                const width = right - left;
+
+                chart.ctx.save();
+                for (const band of bands) {
+                    const top = yScale.getPixelForValue(band.end);
+                    const bottom = yScale.getPixelForValue(band.start);
+                    chart.ctx.fillStyle = band.color;
+                    chart.ctx.fillRect(left, top, width, bottom - top);
+                }
+                chart.ctx.restore();
+            },
+        };
+
+        const rainTrendChart = new Chart(rainChartContext, {
+            type: 'line',
+            plugins: [rainSeverityBandsPlugin],
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Rain Condition',
+                        data: [],
+                        borderColor: '#0369a1',
+                        backgroundColor: 'rgba(3, 105, 161, 0.20)',
+                        borderWidth: 3,
+                        pointRadius: 1.5,
+                        fill: true,
+                        tension: 0.30,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: { color: '#0f172a' },
+                        grid: { color: 'rgba(15, 23, 42, 0.12)' },
+                    },
+                    y: {
+                        min: 0,
+                        max: 2,
+                        ticks: {
+                            color: '#0f172a',
+                            stepSize: 1,
+                            callback: function(value) {
+                                if (Number(value) === 2) return 'Heavy Rain';
+                                if (Number(value) === 1) return 'Rain';
+                                return 'No Rain';
+                            },
+                        },
+                        grid: { color: 'rgba(15, 23, 42, 0.12)' },
+                    },
+                },
+                plugins: {
+                    legend: { labels: { color: '#083344' } },
+                },
+            },
+        });
+
+        const floodChartContext = document.getElementById('floodTrendChart').getContext('2d');
+        const floodSeverityBandsPlugin = {
+            id: 'floodSeverityBands',
+            beforeDraw(chart) {
+                const yScale = chart?.scales?.y;
+                const xScale = chart?.scales?.x;
+
+                if (!yScale || !xScale) {
+                    return;
+                }
+
+                const bands = [
+                    { start: 0, end: 1, color: 'rgba(34, 197, 94, 0.12)' },
+                    { start: 1, end: 2, color: 'rgba(234, 179, 8, 0.12)' },
+                    { start: 2, end: 3, color: 'rgba(249, 115, 22, 0.12)' },
+                    { start: 3, end: 4, color: 'rgba(239, 68, 68, 0.12)' },
+                ];
+
+                const left = xScale.left;
+                const right = xScale.right;
+                const width = right - left;
+
+                chart.ctx.save();
+                for (const band of bands) {
+                    const top = yScale.getPixelForValue(band.end);
+                    const bottom = yScale.getPixelForValue(band.start);
+                    chart.ctx.fillStyle = band.color;
+                    chart.ctx.fillRect(left, top, width, bottom - top);
+                }
+                chart.ctx.restore();
+            },
+        };
+
+        const floodTrendChart = new Chart(floodChartContext, {
+            type: 'line',
+            plugins: [floodSeverityBandsPlugin],
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Flood Severity',
+                        data: [],
+                        borderColor: '#0c4a6e',
+                        backgroundColor: 'rgba(12, 74, 110, 0.20)',
+                        borderWidth: 3,
+                        pointRadius: 1.5,
+                        fill: true,
+                        tension: 0.30,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: { color: '#0f172a' },
+                        grid: { color: 'rgba(15, 23, 42, 0.12)' },
+                    },
+                    y: {
+                        min: 0,
+                        max: 4,
+                        ticks: {
+                            color: '#0f172a',
+                            stepSize: 1,
+                            callback: function(value) {
+                                if (Number(value) === 4) return 'Critical';
+                                if (Number(value) === 3) return 'Flash Warning';
+                                if (Number(value) === 2) return 'Normal Rise';
+                                if (Number(value) === 1) return 'Level 1';
+                                return 'Safe';
+                            },
+                        },
+                        grid: { color: 'rgba(15, 23, 42, 0.12)' },
+                    },
+                },
+                plugins: {
+                    legend: { labels: { color: '#083344' } },
+                },
+            },
+        });
+
+        function rainStatusLabel(level) {
+            if (level === 'heavy_rain') return 'Heavy Rain';
+            if (level === 'rain') return 'Rain';
+            return 'No Rain';
+        }
+
+        function rainStatusScore(level) {
+            if (level === 'heavy_rain') return 2;
+            if (level === 'rain') return 1;
+            return 0;
+        }
+
+        function floodStatusLabel(status) {
+            if (status === 'CRITICAL') return 'Critical';
+            if (status === 'FLASH FLOOD WARNING') return 'Flash Flood Warning';
+            if (status === 'NORMAL RISE') return 'Normal Rise';
+            if (status === 'LEVEL 1 DETECTED') return 'Level 1 Detected';
+            return 'Safe / Dry';
+        }
+
+        function floodStatusScore(status) {
+            if (status === 'CRITICAL') return 4;
+            if (status === 'FLASH FLOOD WARNING') return 3;
+            if (status === 'NORMAL RISE') return 2;
+            if (status === 'LEVEL 1 DETECTED') return 1;
+            return 0;
+        }
+
+        function formatChartTime(iso, mode) {
+            const date = new Date(iso);
+            if (Number.isNaN(date.getTime())) {
+                return '-';
+            }
+
+            return mode === 'day'
+                ? date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : date.toLocaleTimeString();
+        }
+
+        function applyModeButtons(mode) {
+            document.getElementById('btn-hour').className = mode === 'hour'
+                ? 'px-3 py-1.5 rounded-lg bg-cyan-700 text-white text-sm'
+                : 'px-3 py-1.5 rounded-lg bg-white/70 text-cyan-900 text-sm';
+
+            document.getElementById('btn-day').className = mode === 'day'
+                ? 'px-3 py-1.5 rounded-lg bg-cyan-700 text-white text-sm'
+                : 'px-3 py-1.5 rounded-lg bg-white/70 text-cyan-900 text-sm';
+        }
+
+        function render(payload) {
+            const flowSeries = payload?.flow?.series?.[currentMode] ?? [];
+
+            flowTrendChart.data.labels = flowSeries.map((point) => formatChartTime(point.measured_at, currentMode));
+            flowTrendChart.data.datasets[0].data = flowSeries.map((point) => Number(point.flow_lpm ?? 0));
+            flowTrendChart.update();
+
+            const rainLatest = payload?.rain?.latest;
+            const rainSeries = payload?.rain?.series?.[currentMode] ?? [];
+            const rainLevel = String(rainLatest?.intensity_level ?? 'no_rain');
+
+            rainTrendChart.data.labels = rainSeries.map((point) => formatChartTime(point.measured_at, currentMode));
+            rainTrendChart.data.datasets[0].data = rainSeries.map((point) => rainStatusScore(String(point.intensity_level ?? 'no_rain')));
+            rainTrendChart.data.datasets[0].label = 'Rain Condition (' + rainStatusLabel(rainLevel) + ')';
+            rainTrendChart.update();
+
+            const floodLatest = payload?.flood?.latest;
+            const floodSeries = payload?.flood?.series?.[currentMode] ?? [];
+            const floodStatus = String(floodLatest?.status ?? 'SAFE / DRY');
+
+            floodTrendChart.data.labels = floodSeries.map((point) => formatChartTime(point.measured_at, currentMode));
+            floodTrendChart.data.datasets[0].data = floodSeries.map((point) => floodStatusScore(String(point.status ?? 'SAFE / DRY')));
+            floodTrendChart.data.datasets[0].label = 'Flood Severity (' + floodStatusLabel(floodStatus) + ')';
+            floodTrendChart.update();
+        }
+
+        async function refreshData() {
+            try {
+                const response = await fetch(dataUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                const payload = await response.json();
+                render(payload);
+                document.getElementById('live-status').textContent = 'Live: connected';
+                document.getElementById('rain-live-status').textContent = 'Live: connected';
+                document.getElementById('flood-live-status').textContent = 'Live: connected';
+            } catch {
+                document.getElementById('live-status').textContent = 'Live: reconnecting...';
+                document.getElementById('rain-live-status').textContent = 'Live: reconnecting...';
+                document.getElementById('flood-live-status').textContent = 'Live: reconnecting...';
+            }
+        }
+
+        document.getElementById('btn-hour').addEventListener('click', async () => {
+            currentMode = 'hour';
+            applyModeButtons(currentMode);
+            await refreshData();
+        });
+
+        document.getElementById('btn-day').addEventListener('click', async () => {
+            currentMode = 'day';
+            applyModeButtons(currentMode);
+            await refreshData();
+        });
+
+        applyModeButtons(currentMode);
+        render(initialPayload);
+        setInterval(refreshData, 5000);
+
         function createBubble() {
             const container = document.getElementById('bubble-container');
             if (!container) return;
@@ -111,125 +491,6 @@
         
         setInterval(createBubble, 380);
         for (let i = 0; i < 12; i++) setTimeout(createBubble, i * 200);
-        
-        // Interactive live stats random updater (to simulate real-time)
-        let qualityIndex = 98.4;
-        let activeUsers = 1284;
-        let savedLitersVal = 2.3;
-        
-        function updateLiveStats() {
-            // Simulate small fluctuations for interactivity
-            qualityIndex = +(qualityIndex + (Math.random() - 0.5) * 0.3).toFixed(1);
-            if (qualityIndex > 99.5) qualityIndex = 99.2;
-            if (qualityIndex < 96.0) qualityIndex = 96.8;
-            
-            const qualityEl = document.getElementById('live-water-quality');
-            if (qualityEl) qualityEl.innerText = qualityIndex + '%';
-            
-            // active users gently increase
-            activeUsers += Math.floor(Math.random() * 3) - 1;
-            if (activeUsers < 1100) activeUsers = 1120;
-            if (activeUsers > 1450) activeUsers = 1430;
-            const userEl = document.getElementById('active-users-counter');
-            if (userEl) userEl.innerText = activeUsers.toLocaleString();
-            
-            // saved liters increment randomly
-            savedLitersVal += (Math.random() * 0.08);
-            if (savedLitersVal > 2.9) savedLitersVal = 2.4;
-            const litersEl = document.getElementById('saved-liters');
-            if (litersEl) litersEl.innerText = savedLitersVal.toFixed(1) + 'M';
-        }
-        
-        setInterval(updateLiveStats, 3800);
-        
-        // Add ripple effect to all buttons with class .ripple-effect dynamically
-        document.querySelectorAll('.ripple-effect, .glow-button, .card-hover').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                const rippleDiv = document.createElement('span');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size/2;
-                const y = e.clientY - rect.top - size/2;
-                rippleDiv.style.width = rippleDiv.style.height = size + 'px';
-                rippleDiv.style.position = 'absolute';
-                rippleDiv.style.top = y + 'px';
-                rippleDiv.style.left = x + 'px';
-                rippleDiv.style.background = 'radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 80%)';
-                rippleDiv.style.borderRadius = '50%';
-                rippleDiv.style.pointerEvents = 'none';
-                rippleDiv.style.transform = 'scale(0)';
-                rippleDiv.style.transition = 'transform 0.5s ease-out, opacity 0.6s';
-                rippleDiv.style.opacity = '1';
-                this.style.position = 'relative';
-                this.style.overflow = 'hidden';
-                this.appendChild(rippleDiv);
-                requestAnimationFrame(() => {
-                    rippleDiv.style.transform = 'scale(4)';
-                    rippleDiv.style.opacity = '0';
-                });
-                setTimeout(() => rippleDiv.remove(), 800);
-            });
-        });
-        
-        // Feature alert interactive
-        window.showFeatureAlert = (feature) => {
-            // Create a toast notification
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-800/90 backdrop-blur-lg text-white px-6 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-3 animate-bounce transition-all duration-500';
-            toast.innerHTML = `<i class="fas fa-info-circle text-cyan-200 text-xl"></i><span class="font-medium">✨ ${feature} feature — dive into smart water monitoring! ✨</span><i class="fas fa-water text-cyan-200"></i>`;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 2800);
-        };
-        
-        // Add floating effect to logo on hover + interactive card stat simulation
-        const logoImg = document.querySelector('img[alt="AquaWatch Logo"]');
-        if (logoImg) {
-            logoImg.addEventListener('mouseenter', () => {
-                logoImg.style.filter = 'drop-shadow(0 10px 18px rgba(0,150,180,0.5))';
-            });
-            logoImg.addEventListener('mouseleave', () => {
-                logoImg.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))';
-            });
-        }
-        
-        // Custom interactive mouse move on hero card (parallax light effect)
-        const heroCard = document.querySelector('.interactive-card');
-        if (heroCard) {
-            heroCard.addEventListener('mousemove', (e) => {
-                const rect = heroCard.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width;
-                const y = (e.clientY - rect.top) / rect.height;
-                const shadowX = (x - 0.5) * 20;
-                const shadowY = (y - 0.5) * 20;
-                heroCard.style.boxShadow = `${shadowX}px ${shadowY}px 40px rgba(0, 100, 130, 0.3)`;
-                const glow = heroCard.querySelector('.bg-blue-400/20');
-                if (glow) {
-                    glow.style.transform = `translate(${shadowX * 0.2}px, ${shadowY * 0.2}px)`;
-                }
-            });
-            heroCard.addEventListener('mouseleave', () => {
-                heroCard.style.boxShadow = '';
-            });
-        }
-        
-        // additional interactive wave text - update footer year
-        const footerYearSpan = document.querySelector('footer p');
-        if (footerYearSpan) {
-            // Already dynamic year in place, no action needed but ensure copyright is current
-        }
-        
-        // add interactive tooltip to stats
-        const statCards = document.querySelectorAll('.float-stat > div');
-        statCards.forEach(stat => {
-            stat.classList.add('cursor-help');
-            stat.setAttribute('title', 'Live ocean data simulation');
-        });
-        
-        // live water quality mini interactive
-        console.log('🌊 AquaWatch interactive ocean theme active — realtime bubbles & stats');
     </script>
 
 </body>

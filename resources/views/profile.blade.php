@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - AquaWatch</title>
+    <title>Profile - AquWatch</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -84,6 +84,11 @@
                     Edit Profile
                 </a>
 
+                <a href="{{ route('account.settings.edit') }}"
+                   class="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">
+                    Settings
+                </a>
+
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
@@ -134,12 +139,22 @@
 
                     <div class="bg-sky-50 rounded-xl px-4 py-3">
                         <p class="text-xs text-blue-600 font-semibold">Timezone</p>
-                        <p class="text-blue-900">{{ $user->timezone ?? 'Not set' }}</p>
+                        <p class="text-blue-900">{{ $user->timezone ?: 'Asia/Brunei' }}</p>
                     </div>
 
                     <div class="bg-sky-50 rounded-xl px-4 py-3">
                         <p class="text-xs text-blue-600 font-semibold">Phone</p>
                         <p class="text-blue-900">{{ $profile->phone ?? 'Not set' }}</p>
+                    </div>
+
+                    <div class="bg-sky-50 rounded-xl px-4 py-3">
+                        <p class="text-xs text-blue-600 font-semibold">Role</p>
+                        <p class="text-blue-900">{{ $profile->role ? ucfirst($profile->role) : 'Not set' }}</p>
+                    </div>
+
+                    <div class="bg-sky-50 rounded-xl px-4 py-3">
+                        <p class="text-xs text-blue-600 font-semibold">Preferred Language</p>
+                        <p class="text-blue-900">{{ $profile->preferred_language === 'ms' ? 'Bahasa Melayu' : ($profile->preferred_language === 'en' ? 'English' : 'Not set') }}</p>
                     </div>
 
                     <div class="bg-sky-50 rounded-xl px-4 py-3">
@@ -155,8 +170,13 @@
                     <div class="md:col-span-2 bg-sky-50 rounded-xl px-4 py-3">
                         <p class="text-xs text-blue-600 font-semibold">Location</p>
                         <p class="text-blue-900">
-                            {{ ($profile->city ?? '') . (($profile->city && $profile->country) ? ', ' : '') . ($profile->country ?? '') ?: 'Not set' }}
+                            {{ ($profile->district ?? '') . (($profile->district && $profile->mukim) ? ', ' : '') . ($profile->mukim ?? '') . (($profile->district || $profile->mukim) ? ', ' : '') . ($profile->country ?? 'Brunei Darussalam') }}
                         </p>
+                    </div>
+
+                    <div class="md:col-span-2 bg-sky-50 rounded-xl px-4 py-3">
+                        <p class="text-xs text-blue-600 font-semibold">Coordinates</p>
+                        <p class="text-blue-900">{{ $profile->latitude && $profile->longitude ? $profile->latitude . ', ' . $profile->longitude : 'Not set' }}</p>
                     </div>
 
                     <div class="md:col-span-2 bg-sky-50 rounded-xl px-4 py-3">
@@ -203,7 +223,7 @@ setInterval(createBubble, 400);
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>
-            © {{ date('Y') }} AquaWatch — Protecting our waters with real-time intelligence
+            © {{ date('Y') }} AquWatch — Protecting our waters with real-time intelligence
         </p>
     </footer>
 </body>

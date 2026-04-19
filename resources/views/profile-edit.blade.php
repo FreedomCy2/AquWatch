@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile - AquaWatch</title>
+    <title>Edit Profile - AquWatch</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -113,9 +113,13 @@
 
                         <div>
                             <label class="block mb-2 text-sm font-semibold text-blue-900">Timezone</label>
-                            <input type="text" name="timezone" value="{{ old('timezone', $user->timezone) }}"
-                                   placeholder="Example: Asia/Brunei"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                            <select name="timezone"
+                                    class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                                @php $selectedTimezone = old('timezone', $user->timezone ?: 'Asia/Brunei'); @endphp
+                                @foreach($timezones as $timezone)
+                                    <option value="{{ $timezone }}" {{ $selectedTimezone === $timezone ? 'selected' : '' }}>{{ $timezone }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <div>
@@ -128,6 +132,28 @@
                             <label class="block mb-2 text-sm font-semibold text-blue-900">Phone</label>
                             <input type="text" name="phone" value="{{ old('phone', $profile->phone) }}"
                                    class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 text-sm font-semibold text-blue-900">Role</label>
+                            <select name="role"
+                                    class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                                <option value="">Select role</option>
+                                @php $selectedRole = old('role', $profile->role); @endphp
+                                @foreach($roles as $role)
+                                    <option value="{{ $role }}" {{ $selectedRole === $role ? 'selected' : '' }}>{{ ucfirst($role) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 text-sm font-semibold text-blue-900">Preferred Language</label>
+                            <select name="preferred_language"
+                                    class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                                @php $selectedLanguage = old('preferred_language', $profile->preferred_language ?: 'en'); @endphp
+                                <option value="en" {{ $selectedLanguage === 'en' ? 'selected' : '' }}>English</option>
+                                <option value="ms" {{ $selectedLanguage === 'ms' ? 'selected' : '' }}>Bahasa Melayu</option>
+                            </select>
                         </div>
 
                         <div>
@@ -155,15 +181,39 @@
                         </div>
 
                         <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">City</label>
-                            <input type="text" name="city" value="{{ old('city', $profile->city) }}"
+                            <label class="block mb-2 text-sm font-semibold text-blue-900">District</label>
+                            <select name="district"
+                                    class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                                <option value="">Select district</option>
+                                @php $selectedDistrict = old('district', $profile->district); @endphp
+                                @foreach($districts as $district)
+                                    <option value="{{ $district }}" {{ $selectedDistrict === $district ? 'selected' : '' }}>{{ $district }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 text-sm font-semibold text-blue-900">Mukim (Optional)</label>
+                            <input type="text" name="mukim" value="{{ old('mukim', $profile->mukim) }}"
+                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 text-sm font-semibold text-blue-900">Latitude (Optional)</label>
+                            <input type="number" step="0.000001" name="latitude" value="{{ old('latitude', $profile->latitude) }}"
+                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                        </div>
+
+                        <div>
+                            <label class="block mb-2 text-sm font-semibold text-blue-900">Longitude (Optional)</label>
+                            <input type="number" step="0.000001" name="longitude" value="{{ old('longitude', $profile->longitude) }}"
                                    class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
                         </div>
 
                         <div>
                             <label class="block mb-2 text-sm font-semibold text-blue-900">Country</label>
-                            <input type="text" name="country" value="{{ old('country', $profile->country) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                            <input type="text" name="country" value="{{ old('country', $profile->country ?: 'Brunei Darussalam') }}"
+                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-slate-50 text-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-400">
                         </div>
 
                         <div>
@@ -217,7 +267,7 @@
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>
-            © {{ date('Y') }} AquaWatch — Protecting our waters with real-time intelligence
+            © {{ date('Y') }} AquWatch — Protecting our waters with real-time intelligence
         </p>
     </footer>
 

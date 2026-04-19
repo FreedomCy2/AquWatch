@@ -1,9 +1,78 @@
+@php
+    use App\Models\FlowReading;
+    use App\Models\FloodReading;
+    use App\Models\RainReading;
+
+    $dashboardLatestFlow = FlowReading::query()
+        ->orderByDesc('created_at')
+        ->first();
+
+    $dashboardFlowLpm = round((float) ($dashboardLatestFlow?->flow_lpm ?? 0), 3);
+    $dashboardFlowBarPercent = min(100, max(0, ($dashboardFlowLpm / 20) * 100));
+
+    $todayStart = now()->startOfDay();
+    $todayFirst = FlowReading::query()
+        ->where('created_at', '>=', $todayStart)
+        ->orderBy('created_at')
+        ->first();
+    $todayLast = FlowReading::query()
+        ->where('created_at', '>=', $todayStart)
+        ->orderByDesc('created_at')
+        ->first();
+
+    $dashboardDailyMl = max(0, (int) ($todayLast?->total_ml ?? 0) - (int) ($todayFirst?->total_ml ?? 0));
+    $dashboardDailyL = $dashboardDailyMl / 1000;
+
+    $dashboardHasRecentFlow = $dashboardLatestFlow?->created_at?->greaterThanOrEqualTo(now()->subSeconds(15)) ?? false;
+
+    $dashboardLatestRain = RainReading::query()
+        ->orderByDesc('created_at')
+        ->first();
+
+    $dashboardRainAnalog = (int) ($dashboardLatestRain?->analog_value ?? 0);
+    $dashboardRainLevel = (string) ($dashboardLatestRain?->intensity_level ?? 'no_rain');
+    $dashboardRainLabel = match ($dashboardRainLevel) {
+        'heavy_rain' => 'Heavy Rain',
+        'rain' => 'Rain',
+        default => 'No Rain',
+    };
+    $dashboardHasRecentRain = $dashboardLatestRain?->created_at?->greaterThanOrEqualTo(now()->subSeconds(20)) ?? false;
+    $dashboardRainBarPercent = match ($dashboardRainLevel) {
+        'heavy_rain' => 92,
+        'rain' => 58,
+        default => 18,
+    };
+
+    $dashboardLatestFlood = FloodReading::query()
+        ->orderByDesc('created_at')
+        ->first();
+
+    $dashboardFloodStatus = (string) ($dashboardLatestFlood?->status ?? 'SAFE / DRY');
+    $dashboardFloodRiseSec = (int) ($dashboardLatestFlood?->rise_time_sec ?? 0);
+    $dashboardHasRecentFlood = $dashboardLatestFlood?->created_at?->greaterThanOrEqualTo(now()->subSeconds(20)) ?? false;
+    $dashboardFloodCardState = match ($dashboardFloodStatus) {
+        'CRITICAL' => 'Critical',
+        'FLASH FLOOD WARNING' => 'Flash Flood Warning',
+        'NORMAL RISE' => 'Normal Rise',
+        'LEVEL 1 DETECTED' => 'Level 1 Detected',
+        default => 'Safe / Dry',
+    };
+    $dashboardFloodBarPercent = match ($dashboardFloodStatus) {
+        'CRITICAL' => 100,
+        'FLASH FLOOD WARNING' => 82,
+        'NORMAL RISE' => 62,
+        'LEVEL 1 DETECTED' => 38,
+        default => 12,
+    };
+    $dashboardActiveSensors = ((int) $dashboardHasRecentFlow) + ((int) $dashboardHasRecentRain) + ((int) $dashboardHasRecentFlood);
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Dashboard - AquaWatch | Ocean Intelligence</title>
+    <title>Dashboard - AquWatch | Ocean Intelligence</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -172,9 +241,9 @@
     <!-- Header -->
 <header class="relative z-20 flex justify-between items-center w-full max-w-7xl mx-auto px-6 py-5">        <div class="flex items-center gap-3 group cursor-pointer transition-all duration-300">
 <img src="{{ asset('images/Logo.png') }}" 
-     alt="AquaWatch Logo"
+     alt="AquWatch Logo"
      class="h-10 w-auto drop-shadow-md">
-            <h1 class="text-2xl font-black bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquaWatch</h1>
+            <h1 class="text-2xl font-black bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquWatch</h1>
             <span class="ml-2 text-xs bg-white/40 backdrop-blur-sm px-3 py-1 rounded-full text-blue-700">
                 <i class="fas fa-chart-line text-xs"></i> LIVE
             </span>
@@ -185,6 +254,12 @@
                 <i class="fas fa-clock"></i>
                 <span id="live-time">--:-- --</span>
             </div>
+
+            <a href="{{ route('plans') }}"
+               class="flex items-center gap-2 bg-white/80 hover:bg-white px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
+                <i class="fas fa-crown text-amber-500"></i>
+                <span class="hidden sm:inline">Upgrade</span>
+            </a>
 
             <!-- Profile Dropdown -->
             <div class="relative">
@@ -222,7 +297,13 @@
                         <span>Profile</span>
                     </a>
 
-                    <a href="#"
+                          <a href="{{ route('plans') }}"
+                              class="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-sky-50 transition">
+                                <i class="fas fa-crown text-amber-500"></i>
+                                <span>Upgrade Plan</span>
+                          </a>
+
+                    <a href="{{ route('account.settings.edit') }}"
                        class="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-sky-50 transition">
                         <i class="fas fa-gear text-slate-600"></i>
                         <span>Settings</span>
@@ -259,16 +340,8 @@
 
                     <div class="flex gap-6">
                         <div class="text-center">
-                            <div class="text-2xl font-bold text-cyan-700 stat-value" id="water-quality">98.4%</div>
-                            <div class="text-xs text-blue-700">Water Quality</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-teal-700 stat-value" id="active-sensors">12</div>
+                            <div class="text-2xl font-bold text-teal-700 stat-value" id="active-sensors">{{ $dashboardActiveSensors }}</div>
                             <div class="text-xs text-blue-700">Active Sensors</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-emerald-700 stat-value" id="water-saved">2.3M</div>
-                            <div class="text-xs text-blue-700">Liters Saved</div>
                         </div>
                     </div>
                 </div>
@@ -276,26 +349,21 @@
         </div>
 
         <!-- Quick Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div class="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50 hover:bg-white/50 transition-all">
                 <i class="fas fa-tint text-cyan-600 text-2xl mb-2"></i>
                 <div class="text-sm text-blue-700">Current Flow</div>
-                <div class="text-xl font-bold text-blue-900" id="flow-rate">142 L/s</div>
+                <div class="text-xl font-bold text-blue-900" id="flow-rate">{{ number_format($dashboardFlowLpm, 3) }} L/min</div>
             </div>
             <div class="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50 hover:bg-white/50 transition-all">
                 <i class="fas fa-cloud-rain text-blue-600 text-2xl mb-2"></i>
-                <div class="text-sm text-blue-700">Rainfall</div>
-                <div class="text-xl font-bold text-blue-900" id="rainfall">23 mm</div>
+                <div class="text-sm text-blue-700">Rain Status</div>
+                <div class="text-xl font-bold text-blue-900" id="rainfall">{{ $dashboardRainLabel }}</div>
             </div>
             <div class="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50 hover:bg-white/50 transition-all">
                 <i class="fas fa-water text-teal-600 text-2xl mb-2"></i>
                 <div class="text-sm text-blue-700">Flood Level</div>
-                <div class="text-xl font-bold text-blue-900" id="flood-level">1.2 m</div>
-            </div>
-            <div class="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50 hover:bg-white/50 transition-all">
-                <i class="fas fa-chart-line text-emerald-600 text-2xl mb-2"></i>
-                <div class="text-sm text-blue-700">pH Level</div>
-                <div class="text-xl font-bold text-blue-900" id="ph-level">7.2</div>
+                <div class="text-xl font-bold text-blue-900" id="flood-level">{{ $dashboardFloodCardState }}</div>
             </div>
         </div>
 
@@ -306,18 +374,18 @@
             <a href="contents/rain-display" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
                 <div class="flex items-start justify-between mb-4">
                     <div class="text-5xl group-hover:scale-110 transition-transform duration-300">🌧️</div>
-                    <div class="bg-cyan-100/80 rounded-full px-3 py-1 text-xs text-cyan-700">
-                        <i class="fas fa-chart-simple"></i> Updated now
+                    <div id="rain-state-badge" class="{{ $dashboardHasRecentRain ? 'bg-cyan-100/80 text-cyan-700' : 'bg-slate-100/80 text-slate-700' }} rounded-full px-3 py-1 text-xs">
+                        <i class="fas fa-chart-simple"></i> {{ $dashboardHasRecentRain ? 'Live' : 'No recent data' }}
                     </div>
                 </div>
                 <h3 class="text-2xl font-bold text-blue-900 mb-2">Rain Display</h3>
                 <p class="text-blue-700 mb-3">Real-time rainfall intensity and forecast data</p>
                 <div class="flex items-center gap-4 text-sm">
-                    <span class="text-blue-600"><i class="fas fa-arrow-trend-up"></i> <span id="rain-trend">+12%</span></span>
-                    <span class="text-blue-600"><i class="fas fa-calendar"></i> Next 24h: <span id="rain-forecast">15-25mm</span></span>
+                    <span class="text-blue-600"><i class="fas fa-cloud-rain"></i> <span id="rain-trend">{{ $dashboardRainLabel }}</span></span>
+                    <span class="text-blue-600"><i class="fas fa-sliders"></i> Value: <span id="rain-forecast">{{ number_format($dashboardRainAnalog) }}</span></span>
                 </div>
                 <div class="mt-3 w-full bg-blue-200/50 rounded-full h-2">
-                    <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full" style="width: 65%" id="rain-bar"></div>
+                    <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full" style="width: {{ $dashboardRainBarPercent }}%" id="rain-bar"></div>
                 </div>
             </a>
 
@@ -325,18 +393,18 @@
             <a href="contents/flood-display" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
                 <div class="flex items-start justify-between mb-4">
                     <div class="text-5xl group-hover:scale-110 transition-transform duration-300">🌊</div>
-                    <div class="bg-blue-100/80 rounded-full px-3 py-1 text-xs text-blue-700">
-                        <i class="fas fa-chart-line"></i> Alert Level: Normal
+                    <div id="flood-state-badge" class="{{ $dashboardHasRecentFlood ? 'bg-blue-100/80 text-blue-700' : 'bg-slate-100/80 text-slate-700' }} rounded-full px-3 py-1 text-xs">
+                        <i class="fas fa-chart-line"></i> {{ $dashboardHasRecentFlood ? 'Live' : 'No recent data' }}
                     </div>
                 </div>
                 <h3 class="text-2xl font-bold text-blue-900 mb-2">Flood Display</h3>
                 <p class="text-blue-700 mb-3">Water level monitoring and flood warnings</p>
                 <div class="flex items-center gap-4 text-sm">
-                    <span class="text-blue-600"><i class="fas fa-arrow-trend-up"></i> <span id="flood-trend">+0.1m</span></span>
-                    <span class="text-blue-600"><i class="fas fa-gauge-high"></i> Threshold: <span id="flood-threshold">2.5m</span></span>
+                    <span class="text-blue-600"><i class="fas fa-arrow-trend-up"></i> <span id="flood-trend">{{ $dashboardFloodCardState }}</span></span>
+                    <span class="text-blue-600"><i class="fas fa-stopwatch"></i> Rise: <span id="flood-threshold">{{ number_format($dashboardFloodRiseSec) }}s</span></span>
                 </div>
                 <div class="mt-3 w-full bg-blue-200/50 rounded-full h-2">
-                    <div class="bg-gradient-to-r from-teal-500 to-blue-500 h-2 rounded-full" style="width: 48%" id="flood-bar"></div>
+                    <div class="bg-gradient-to-r from-teal-500 to-blue-500 h-2 rounded-full" style="width: {{ $dashboardFloodBarPercent }}%" id="flood-bar"></div>
                 </div>
             </a>
 
@@ -344,18 +412,18 @@
             <a href="contents/flow-display" class="dashboard-card bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg hover:shadow-2xl transition-all duration-300 group block">
                 <div class="flex items-start justify-between mb-4">
                     <div class="text-5xl group-hover:scale-110 transition-transform duration-300">💧</div>
-                    <div class="bg-emerald-100/80 rounded-full px-3 py-1 text-xs text-emerald-700">
-                        <i class="fas fa-tachometer-alt"></i> Optimal
+                    <div id="flow-state-badge" class="bg-emerald-100/80 rounded-full px-3 py-1 text-xs text-emerald-700">
+                        <i class="fas fa-tachometer-alt"></i> {{ $dashboardHasRecentFlow ? 'Live' : 'No recent data' }}
                     </div>
                 </div>
                 <h3 class="text-2xl font-bold text-blue-900 mb-2">Flow Display</h3>
                 <p class="text-blue-700 mb-3">Water flow rate and volume tracking</p>
                 <div class="flex items-center gap-4 text-sm">
-                    <span class="text-blue-600"><i class="fas fa-water"></i> Rate: <span id="flow-rate-detail">142 L/s</span></span>
-                    <span class="text-blue-600"><i class="fas fa-chart-line"></i> Daily: <span id="daily-volume">12,300 m³</span></span>
+                    <span class="text-blue-600"><i class="fas fa-water"></i> Rate: <span id="flow-rate-detail">{{ number_format($dashboardFlowLpm, 3) }} L/min</span></span>
+                    <span class="text-blue-600"><i class="fas fa-chart-line"></i> Daily: <span id="daily-volume">{{ number_format($dashboardDailyL, 2) }} L</span></span>
                 </div>
                 <div class="mt-3 w-full bg-blue-200/50 rounded-full h-2">
-                    <div class="bg-gradient-to-r from-cyan-500 to-emerald-500 h-2 rounded-full" style="width: 72%" id="flow-bar"></div>
+                    <div class="bg-gradient-to-r from-cyan-500 to-emerald-500 h-2 rounded-full" style="width: {{ $dashboardFlowBarPercent }}%" id="flow-bar"></div>
                 </div>
             </a>
 
@@ -368,7 +436,7 @@
                     </div>
                 </div>
                 <h3 class="text-2xl font-bold text-blue-900 mb-2">Graph Display</h3>
-                <p class="text-blue-700 mb-3">Real-time water quality & flow visualization</p>
+                <p class="text-blue-700 mb-3">Real-time flow, rain, and flood visualization</p>
                 <div class="chart-container">
                     <canvas id="waterChart" width="400" height="200" style="max-height: 180px; width: 100%"></canvas>
                 </div>
@@ -412,7 +480,7 @@
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>
-            © {{ date('Y') }} AquaWatch — Protecting our waters with real-time intelligence
+            © {{ date('Y') }} AquWatch — Protecting our waters with real-time intelligence
         </p>
     </footer>
 
@@ -478,12 +546,32 @@
         }
 
         // ========== SIMULATE REAL-TIME DATA ==========
-        let flowRate = 142;
-        let rainfall = 23;
-        let floodLevel = 1.2;
-        let pH = 7.2;
-        let waterQuality = 98.4;
-        let waterSaved = 2.3;
+        const flowDataUrl = @json(route('contents.flow-display.data'));
+        const rainDataUrl = @json(route('contents.rain-display.data'));
+        const floodDataUrl = @json(route('contents.flood-display.data'));
+
+        let flowRate = Number(@json($dashboardFlowLpm));
+        let rainStatusText = @json($dashboardRainLabel);
+        let rainAnalog = Number(@json($dashboardRainAnalog));
+        let floodStatusText = @json($dashboardFloodCardState);
+        let floodRiseSec = Number(@json($dashboardFloodRiseSec));
+        let flowSensorIsRecent = Boolean(@json($dashboardHasRecentFlow));
+        let rainSensorIsRecent = Boolean(@json($dashboardHasRecentRain));
+        let floodSensorIsRecent = Boolean(@json($dashboardHasRecentFlood));
+        let dailyVolumeL = Number(@json(round($dashboardDailyL, 2)));
+
+        function refreshActiveSensors() {
+            const activeSensorsEl = document.getElementById('active-sensors');
+            if (!activeSensorsEl) {
+                return;
+            }
+
+            const activeCount = (flowSensorIsRecent ? 1 : 0)
+                + (rainSensorIsRecent ? 1 : 0)
+                + (floodSensorIsRecent ? 1 : 0);
+
+            activeSensorsEl.textContent = String(activeCount);
+        }
 
         const chartCanvas = document.getElementById('waterChart');
         let chart = null;
@@ -496,18 +584,10 @@
                     labels: ['6h', '5h', '4h', '3h', '2h', '1h', 'Now'],
                     datasets: [
                         {
-                            label: 'Flow Rate (L/s)',
-                            data: [138, 140, 142, 141, 143, 142, 142],
+                            label: 'Flow Rate (L/min)',
+                            data: [flowRate, flowRate, flowRate, flowRate, flowRate, flowRate, flowRate],
                             borderColor: '#0e7c9e',
                             backgroundColor: 'rgba(14, 124, 158, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Water Quality (%)',
-                            data: [97.8, 98.0, 98.2, 98.3, 98.4, 98.4, 98.4],
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
                             tension: 0.4,
                             fill: true
                         }
@@ -542,67 +622,190 @@
             });
         }
 
+        async function refreshFlowSummary() {
+            try {
+                const response = await fetch(flowDataUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                const payload = await response.json();
+                const latest = payload?.latest;
+                flowRate = Number(latest?.flow_lpm ?? 0);
+
+                const flowRateEl = document.getElementById('flow-rate');
+                const flowRateDetailEl = document.getElementById('flow-rate-detail');
+                const dailyVolumeEl = document.getElementById('daily-volume');
+                const flowBarEl = document.getElementById('flow-bar');
+                const flowStateBadgeEl = document.getElementById('flow-state-badge');
+
+                if (flowRateEl) flowRateEl.textContent = flowRate.toFixed(3) + ' L/min';
+                if (flowRateDetailEl) flowRateDetailEl.textContent = flowRate.toFixed(3) + ' L/min';
+
+                dailyVolumeL = Number((latest?.total_ml ?? 0) / 1000);
+                if (dailyVolumeEl) dailyVolumeEl.textContent = dailyVolumeL.toFixed(2) + ' L';
+
+                const flowPercent = Math.min(100, (flowRate / 20) * 100);
+                if (flowBarEl) flowBarEl.style.width = flowPercent + '%';
+
+                if (flowStateBadgeEl) {
+                    if (latest?.is_recent) {
+                        flowSensorIsRecent = true;
+                        flowStateBadgeEl.className = 'bg-emerald-100/80 rounded-full px-3 py-1 text-xs text-emerald-700';
+                        flowStateBadgeEl.innerHTML = '<i class="fas fa-tachometer-alt"></i> Live';
+                    } else {
+                        flowSensorIsRecent = false;
+                        flowStateBadgeEl.className = 'bg-slate-100/80 rounded-full px-3 py-1 text-xs text-slate-700';
+                        flowStateBadgeEl.innerHTML = '<i class="fas fa-tachometer-alt"></i> No recent data';
+                    }
+                }
+
+                refreshActiveSensors();
+            } catch {
+                // Keep last known values on temporary request failures.
+            }
+        }
+
+        function getRainBarPercent(level) {
+            if (level === 'heavy_rain') return 92;
+            if (level === 'rain') return 58;
+            return 18;
+        }
+
+        function getRainLabel(level) {
+            if (level === 'heavy_rain') return 'Heavy Rain';
+            if (level === 'rain') return 'Rain';
+            return 'No Rain';
+        }
+
+        async function refreshRainSummary() {
+            try {
+                const response = await fetch(rainDataUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                const payload = await response.json();
+                const latest = payload?.latest;
+                const level = String(latest?.intensity_level ?? 'no_rain');
+                rainStatusText = getRainLabel(level);
+                rainAnalog = Number(latest?.analog_value ?? 0);
+
+                const rainfallEl = document.getElementById('rainfall');
+                const rainTrendEl = document.getElementById('rain-trend');
+                const rainForecastEl = document.getElementById('rain-forecast');
+                const rainBarEl = document.getElementById('rain-bar');
+                const rainStateBadgeEl = document.getElementById('rain-state-badge');
+
+                if (rainfallEl) rainfallEl.textContent = rainStatusText;
+                if (rainTrendEl) rainTrendEl.textContent = rainStatusText;
+                if (rainForecastEl) rainForecastEl.textContent = rainAnalog.toLocaleString();
+                if (rainBarEl) rainBarEl.style.width = getRainBarPercent(level) + '%';
+
+                if (rainStateBadgeEl) {
+                    if (latest?.is_recent) {
+                        rainSensorIsRecent = true;
+                        rainStateBadgeEl.className = 'bg-cyan-100/80 rounded-full px-3 py-1 text-xs text-cyan-700';
+                        rainStateBadgeEl.innerHTML = '<i class="fas fa-chart-simple"></i> Live';
+                    } else {
+                        rainSensorIsRecent = false;
+                        rainStateBadgeEl.className = 'bg-slate-100/80 rounded-full px-3 py-1 text-xs text-slate-700';
+                        rainStateBadgeEl.innerHTML = '<i class="fas fa-chart-simple"></i> No recent data';
+                    }
+                }
+
+                refreshActiveSensors();
+            } catch {
+                // Keep last known values on temporary request failures.
+            }
+        }
+
+        function floodStatusLabel(status) {
+            if (status === 'CRITICAL') return 'Critical';
+            if (status === 'FLASH FLOOD WARNING') return 'Flash Flood Warning';
+            if (status === 'NORMAL RISE') return 'Normal Rise';
+            if (status === 'LEVEL 1 DETECTED') return 'Level 1 Detected';
+            return 'Safe / Dry';
+        }
+
+        function floodBarPercent(status) {
+            if (status === 'CRITICAL') return 100;
+            if (status === 'FLASH FLOOD WARNING') return 82;
+            if (status === 'NORMAL RISE') return 62;
+            if (status === 'LEVEL 1 DETECTED') return 38;
+            return 12;
+        }
+
+        async function refreshFloodSummary() {
+            try {
+                const response = await fetch(floodDataUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                const payload = await response.json();
+                const latest = payload?.latest;
+                const status = String(latest?.status ?? 'SAFE / DRY');
+
+                floodStatusText = floodStatusLabel(status);
+                floodRiseSec = Number(latest?.rise_time_sec ?? 0);
+
+                const floodLevelEl = document.getElementById('flood-level');
+                const floodTrendEl = document.getElementById('flood-trend');
+                const floodThresholdEl = document.getElementById('flood-threshold');
+                const floodBarEl = document.getElementById('flood-bar');
+                const floodStateBadgeEl = document.getElementById('flood-state-badge');
+
+                if (floodLevelEl) floodLevelEl.textContent = floodStatusText;
+                if (floodTrendEl) floodTrendEl.textContent = floodStatusText;
+                if (floodThresholdEl) floodThresholdEl.textContent = floodRiseSec.toLocaleString() + 's';
+                if (floodBarEl) floodBarEl.style.width = floodBarPercent(status) + '%';
+
+                if (floodStateBadgeEl) {
+                    if (latest?.is_recent) {
+                        floodSensorIsRecent = true;
+                        floodStateBadgeEl.className = 'bg-blue-100/80 rounded-full px-3 py-1 text-xs text-blue-700';
+                        floodStateBadgeEl.innerHTML = '<i class="fas fa-chart-line"></i> Live';
+                    } else {
+                        floodSensorIsRecent = false;
+                        floodStateBadgeEl.className = 'bg-slate-100/80 rounded-full px-3 py-1 text-xs text-slate-700';
+                        floodStateBadgeEl.innerHTML = '<i class="fas fa-chart-line"></i> No recent data';
+                    }
+                }
+
+                refreshActiveSensors();
+            } catch {
+                // Keep last known values on temporary request failures.
+            }
+        }
+
         function simulateDataUpdate() {
-            flowRate = Math.max(120, Math.min(165, flowRate + (Math.random() - 0.5) * 3));
-            rainfall = Math.max(10, Math.min(45, rainfall + (Math.random() - 0.5) * 1.5));
-            floodLevel = Math.max(0.5, Math.min(2.8, floodLevel + (Math.random() - 0.5) * 0.08));
-            pH = Math.max(6.5, Math.min(8.0, pH + (Math.random() - 0.5) * 0.05));
-            waterQuality = Math.max(95, Math.min(99.5, waterQuality + (Math.random() - 0.5) * 0.2));
-            waterSaved = waterSaved + (Math.random() - 0.5) * 0.03;
-
-            if (waterSaved < 2.1) waterSaved = 2.2;
-            if (waterSaved > 2.6) waterSaved = 2.5;
-
-            const flowRateEl = document.getElementById('flow-rate');
-            const rainfallEl = document.getElementById('rainfall');
-            const floodLevelEl = document.getElementById('flood-level');
-            const phLevelEl = document.getElementById('ph-level');
-            const waterQualityEl = document.getElementById('water-quality');
-            const waterSavedEl = document.getElementById('water-saved');
-            const flowRateDetailEl = document.getElementById('flow-rate-detail');
-            const dailyVolumeEl = document.getElementById('daily-volume');
-            const rainTrendEl = document.getElementById('rain-trend');
-            const rainForecastEl = document.getElementById('rain-forecast');
-            const rainBarEl = document.getElementById('rain-bar');
-            const floodBarEl = document.getElementById('flood-bar');
-            const floodTrendEl = document.getElementById('flood-trend');
-            const flowBarEl = document.getElementById('flow-bar');
-
-            if (flowRateEl) flowRateEl.textContent = Math.round(flowRate) + ' L/s';
-            if (rainfallEl) rainfallEl.textContent = Math.round(rainfall) + ' mm';
-            if (floodLevelEl) floodLevelEl.textContent = floodLevel.toFixed(1) + ' m';
-            if (phLevelEl) phLevelEl.textContent = pH.toFixed(1);
-            if (waterQualityEl) waterQualityEl.textContent = waterQuality.toFixed(1) + '%';
-            if (waterSavedEl) waterSavedEl.textContent = waterSaved.toFixed(1) + 'M';
-
-            if (flowRateDetailEl) flowRateDetailEl.textContent = Math.round(flowRate) + ' L/s';
-            if (dailyVolumeEl) dailyVolumeEl.textContent = Math.round(flowRate * 8.64) + ' m³';
-
-            const rainTrend = ((Math.random() * 20) - 5).toFixed(0);
-            if (rainTrendEl) rainTrendEl.textContent = (rainTrend >= 0 ? '+' : '') + rainTrend + '%';
-            if (rainForecastEl) rainForecastEl.textContent = Math.round(rainfall - 5) + '-' + Math.round(rainfall + 8) + 'mm';
-            if (rainBarEl) rainBarEl.style.width = Math.min(100, (rainfall / 50) * 100) + '%';
-
-            const floodPercent = Math.min(100, (floodLevel / 3) * 100);
-            if (floodBarEl) floodBarEl.style.width = floodPercent + '%';
-            if (floodTrendEl) floodTrendEl.textContent = (floodLevel > 1.3 ? '+' : '') + (floodLevel - 1.2).toFixed(1) + 'm';
-
-            const flowPercent = Math.min(100, (flowRate / 200) * 100);
-            if (flowBarEl) flowBarEl.style.width = flowPercent + '%';
-
             if (chart) {
                 const newFlowData = [...chart.data.datasets[0].data.slice(1), Math.round(flowRate)];
-                const newQualityData = [...chart.data.datasets[1].data.slice(1), waterQuality];
                 chart.data.datasets[0].data = newFlowData;
-                chart.data.datasets[1].data = newQualityData;
                 chart.update('none');
             }
 
             const alerts = [
                 '<i class="fas fa-check-circle text-green-500"></i> System health: Optimal',
-                '<i class="fas fa-tint text-cyan-500"></i> Flow rate stable at ' + Math.round(flowRate) + ' L/s',
-                '<i class="fas fa-chart-line text-blue-500"></i> Water quality at ' + waterQuality.toFixed(1) + '%',
-                '<i class="fas fa-cloud-rain text-blue-500"></i> ' + Math.round(rainfall) + 'mm rainfall recorded'
+                '<i class="fas fa-tint text-cyan-500"></i> Flow rate stable at ' + flowRate.toFixed(3) + ' L/min',
+                '<i class="fas fa-cloud-rain text-blue-500"></i> Rain sensor: ' + rainStatusText + ' (value ' + rainAnalog.toLocaleString() + ')',
+                '<i class="fas fa-water text-blue-500"></i> Flood sensor: ' + floodStatusText + ' (rise ' + floodRiseSec.toLocaleString() + 's)'
             ];
 
             const alertContainer = document.getElementById('alert-container');
@@ -623,6 +826,13 @@
             }
         }
 
+        refreshFlowSummary();
+        refreshRainSummary();
+        refreshFloodSummary();
+        refreshActiveSensors();
+        setInterval(refreshFlowSummary, 5000);
+        setInterval(refreshRainSummary, 5000);
+        setInterval(refreshFloodSummary, 5000);
         setInterval(simulateDataUpdate, 4000);
 
         // ========== RIPPLE EFFECT ==========
@@ -659,7 +869,7 @@
         });
 
 
-        console.log('🌊 AquaWatch Dashboard — Real-time monitoring active');
+        console.log('🌊 AquWatch Dashboard — Real-time monitoring active');
     </script>
 </body>
 </html>

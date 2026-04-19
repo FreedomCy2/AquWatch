@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,5 +34,12 @@ class User extends Authenticatable
     
     {
     return $this->hasOne(\App\Models\Profile::class);
+    }
+
+    public function sensors(): BelongsToMany
+    {
+        return $this->belongsToMany(Sensor::class, 'sensor_user')
+            ->withPivot('role')
+            ->withTimestamps();
     }
 }

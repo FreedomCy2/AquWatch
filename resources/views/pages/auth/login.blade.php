@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Login - AquaWatch | Intelligent Water Monitoring</title>
+    <title>Login - AquWatch | Intelligent Water Monitoring</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -184,7 +184,7 @@
                     <div class="relative inline-block group">
                         <div class="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl scale-110 group-hover:scale-125 transition-transform duration-700"></div>
                         <img src="{{ asset('images/Logo.png') }}" 
-                            alt="AquaWatch Logo"
+                            alt="AquWatch Logo"
                             class="relative mx-auto mb-5 w-28 h-28 object-contain rounded-2xl shadow-2xl border-3 border-white/70 transition-all duration-500 group-hover:scale-105 logo-glow">
                     </div>
                     
@@ -237,7 +237,7 @@
                                 required
                                 autofocus
                                 autocomplete="email"
-                                placeholder="hello@aquawatch.com"
+                                placeholder="hello@aquwatch.com"
                                 class="input-focus-effect w-full rounded-xl border border-blue-200 bg-white/90 px-4 py-3.5 text-blue-900 placeholder-blue-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-200"
                             >
                             <i class="fas fa-user-circle absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-300 text-lg"></i>
@@ -330,7 +330,7 @@
                 @if (Route::has('register'))
                     <div class="text-center">
                         <p class="text-sm text-blue-700">
-                            New to AquaWatch?
+                            New to AquWatch?
                             <a href="{{ route('register') }}" class="font-semibold text-cyan-700 hover:text-cyan-900 hover:underline transition-all duration-200 inline-flex items-center gap-1 group">
                                 Create an account
                                 <i class="fas fa-arrow-right text-xs transform group-hover:translate-x-1 transition-transform"></i>
@@ -361,7 +361,7 @@
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>
-            © {{ date('Y') }} AquaWatch — Intelligent Water Monitoring
+            © {{ date('Y') }} AquWatch — Intelligent Water Monitoring
         </p>
     </footer>
 
@@ -505,7 +505,7 @@
             icon.setAttribute('title', 'Secure connection with 256-bit encryption');
         });
         
-        console.log('🌊 AquaWatch Login — Interactive Ocean Theme Active');
+        console.log('🌊 AquWatch Login — Interactive Ocean Theme Active');
     </script>
 </body>
 </html>

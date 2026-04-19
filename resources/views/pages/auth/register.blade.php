@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Register - AquaWatch | Join Ocean Protection</title>
+    <title>Register - AquWatch | Join Ocean Protection</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -195,7 +195,7 @@
                     <div class="relative inline-block group">
                         <div class="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl scale-110 group-hover:scale-125 transition-transform duration-700"></div>
                         <img src="{{ asset('images/Logo.png') }}" 
-                            alt="AquaWatch Logo"
+                            alt="AquWatch Logo"
                             class="relative mx-auto mb-4 w-28 h-28 object-contain rounded-2xl shadow-2xl border-3 border-white/70 transition-all duration-500 group-hover:scale-105 logo-glow">
                     </div>
                     
@@ -264,7 +264,7 @@
                                 value="{{ old('email') }}"
                                 required
                                 autocomplete="email"
-                                placeholder="hello@aquawatch.com"
+                                placeholder="hello@aquwatch.com"
                                 class="input-focus-effect w-full rounded-xl border border-blue-200 bg-white/90 px-4 py-3.5 text-blue-900 placeholder-blue-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-200"
                             >
                             <i class="fas fa-envelope absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-300 text-lg"></i>
@@ -393,7 +393,7 @@
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>
-            © {{ date('Y') }} AquaWatch — Every drop counts. Join the movement.
+            © {{ date('Y') }} AquWatch — Every drop counts. Join the movement.
         </p>
     </footer>
 
@@ -512,7 +512,7 @@
             });
         }
         
-        console.log('🌊 AquaWatch Registration — Interactive Ocean Theme Active');
+        console.log('🌊 AquWatch Registration — Interactive Ocean Theme Active');
     </script>
 </body>
 </html>

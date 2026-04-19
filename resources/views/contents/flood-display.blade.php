@@ -3,18 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Dashboard - AquaWatch | Ocean Intelligence</title>    
-  
-    <!-- Tailwind CSS CDN -->
+    <title>Flood Monitoring - AquWatch</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -47,16 +39,17 @@
             0% { transform: translateY(0); opacity: 0.7; }
             100% { transform: translateY(-100vh); opacity: 0; }
         }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.32);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+        }
     </style>
 </head>
-
-<!-- ✅ FIXED BODY -->
 <body class="min-h-screen flex flex-col bg-gradient-to-br from-sky-200 via-cyan-200 to-teal-200 relative overflow-x-hidden">
-
-    <!-- Bubble Background -->
     <div id="bubble-container" class="fixed inset-0 pointer-events-none z-0"></div>
 
-    <!-- Wave Background -->
     <div class="wave-bg">
         <svg class="wave-svg" viewBox="0 0 1440 320">
             <path fill="#4fc3f7" fill-opacity="0.7"
@@ -65,16 +58,79 @@
         </svg>
     </div>
 
-    <!-- ✅ MAIN CONTENT (IMPORTANT) -->
-    <main class="flex-grow relative z-10 p-6">
-        <!-- You can put your dashboard content here -->
-        <div class="text-center text-blue-900 mt-10">
-            <h1 class="text-3xl font-bold">Flood Display</h1>
-            <p class="text-sm opacity-70">Your content goes here</p>
+    <main class="flex-grow relative z-10 p-5 md:p-8">
+        <div class="mx-auto max-w-6xl space-y-6">
+            <div class="glass-card rounded-3xl p-5 md:p-7 shadow-xl">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-cyan-950">Flood Monitor</h1>
+                        <p class="text-cyan-900/80 mt-1">Simple live view of flood level sensors</p>
+                    </div>
+                    <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-xl bg-cyan-700 text-white hover:bg-cyan-800 transition">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div class="glass-card rounded-2xl p-4 shadow-lg">
+                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Flood Status</p>
+                    <p id="kpi-status" class="text-2xl font-bold text-cyan-950 mt-1">Checking...</p>
+                    <p class="text-cyan-900/70 text-sm">safe / warning / critical</p>
+                </div>
+
+                <div class="glass-card rounded-2xl p-4 shadow-lg">
+                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Rise Time</p>
+                    <p id="kpi-rise" class="text-3xl font-bold text-cyan-950 mt-1">0</p>
+                    <p class="text-cyan-900/70 text-sm">seconds</p>
+                </div>
+
+                <div class="glass-card rounded-2xl p-4 shadow-lg">
+                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Last Updated</p>
+                    <p id="kpi-time" class="text-lg font-bold text-cyan-950 mt-1">-</p>
+                    <p id="kpi-sensor" class="text-cyan-900/70 text-sm">Sensor: -</p>
+                </div>
+
+                <div class="glass-card rounded-2xl p-4 shadow-lg">
+                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Last Hour</p>
+                    <p id="kpi-hour" class="text-3xl font-bold text-cyan-950 mt-1">0</p>
+                    <p class="text-cyan-900/70 text-sm">warning+ readings</p>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-4 md:p-6 shadow-xl">
+                <h2 class="text-xl font-bold text-cyan-950 mb-3">Sensor States</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="rounded-xl bg-white/60 p-4 border border-white/60">
+                        <p class="text-sm text-cyan-900/70">Level Sensor 1</p>
+                        <p id="s1-state" class="text-xl font-bold text-cyan-950">Dry</p>
+                    </div>
+                    <div class="rounded-xl bg-white/60 p-4 border border-white/60">
+                        <p class="text-sm text-cyan-900/70">Level Sensor 2</p>
+                        <p id="s2-state" class="text-xl font-bold text-cyan-950">Dry</p>
+                    </div>
+                    <div class="rounded-xl bg-white/60 p-4 border border-white/60">
+                        <p class="text-sm text-cyan-900/70">Level Sensor 3</p>
+                        <p id="s3-state" class="text-xl font-bold text-cyan-950">Dry</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-3xl p-4 md:p-6 shadow-xl">
+                <h2 class="text-xl font-bold text-cyan-950 mb-3">More Details</h2>
+                <p class="text-cyan-900/80 mb-4">Need trend graph or full reading history? Open one of the optional pages below.</p>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{{ route('contents.graph-display') }}#flood-graph-section" class="px-4 py-2 rounded-xl bg-cyan-700 text-white hover:bg-cyan-800 transition">
+                        Open Flood Graph
+                    </a>
+                    <a href="{{ route('contents.flood-readings') }}" class="px-4 py-2 rounded-xl bg-white/70 text-cyan-900 hover:bg-white transition">
+                        View Recent Readings
+                    </a>
+                </div>
+            </div>
         </div>
     </main>
 
-    <!-- ✅ FIXED FOOTER -->
     <footer class="mt-auto relative z-10 text-center text-blue-800/80 py-5 text-sm backdrop-blur-sm bg-white/20 border-t border-white/40">
         <div class="flex justify-center gap-6 mb-2">
             <a href="#" class="hover:text-cyan-800 transition"><i class="fab fa-twitter"></i></a>
@@ -83,12 +139,99 @@
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>
-            © {{ date('Y') }} AquaWatch — Protecting our waters
+            © {{ date('Y') }} AquWatch — Protecting our waters
         </p>
     </footer>
 
     <script>
-        // ---------- INTERACTIVE BUBBLE GENERATION (ocean vibe) ----------
+        const initialPayload = @json($initialPayload);
+        const dataUrl = @json(route('contents.flood-display.data'));
+
+        function formatTime(iso) {
+            if (!iso) {
+                return '-';
+            }
+
+            const date = new Date(iso);
+            if (Number.isNaN(date.getTime())) {
+                return '-';
+            }
+
+            return date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+        }
+
+        function toShortStatus(status) {
+            if (status === 'CRITICAL') return 'Critical';
+            if (status === 'FLASH FLOOD WARNING') return 'Flash Flood Warning';
+            if (status === 'NORMAL RISE') return 'Normal Rise';
+            if (status === 'LEVEL 1 DETECTED') return 'Level 1 Detected';
+            return 'Safe / Dry';
+        }
+
+        function sensorWetText(isWet) {
+            return isWet ? 'Wet' : 'Dry';
+        }
+
+        function render(payload) {
+            const latest = payload?.latest;
+            const statusEl = document.getElementById('kpi-status');
+
+            document.getElementById('kpi-rise').textContent = Number(latest?.rise_time_sec ?? 0).toLocaleString();
+            document.getElementById('kpi-time').textContent = formatTime(latest?.measured_at);
+            document.getElementById('kpi-sensor').textContent = `Sensor: ${latest?.sensor_id ?? '-'}`;
+            document.getElementById('kpi-hour').textContent = Number(payload?.stats?.last_hour_warning_count ?? 0).toLocaleString();
+
+            document.getElementById('s1-state').textContent = sensorWetText(Boolean(latest?.s1_wet));
+            document.getElementById('s2-state').textContent = sensorWetText(Boolean(latest?.s2_wet));
+            document.getElementById('s3-state').textContent = sensorWetText(Boolean(latest?.s3_wet));
+
+            const status = String(latest?.status ?? 'SAFE / DRY');
+
+            if (!latest?.is_recent) {
+                statusEl.textContent = 'No recent data';
+                statusEl.className = 'text-2xl font-bold text-slate-700 mt-1';
+                return;
+            }
+
+            if (status === 'CRITICAL' || status === 'FLASH FLOOD WARNING') {
+                statusEl.textContent = toShortStatus(status);
+                statusEl.className = 'text-2xl font-bold text-rose-700 mt-1';
+            } else if (status === 'NORMAL RISE' || status === 'LEVEL 1 DETECTED') {
+                statusEl.textContent = toShortStatus(status);
+                statusEl.className = 'text-2xl font-bold text-amber-700 mt-1';
+            } else {
+                statusEl.textContent = 'Safe / Dry';
+                statusEl.className = 'text-2xl font-bold text-emerald-700 mt-1';
+            }
+        }
+
+        async function refreshData() {
+            try {
+                const response = await fetch(dataUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+
+                const payload = await response.json();
+                render(payload);
+            } catch {
+                const statusEl = document.getElementById('kpi-status');
+                statusEl.textContent = 'Connection issue';
+                statusEl.className = 'text-2xl font-bold text-rose-700 mt-1';
+            }
+        }
+
+        render(initialPayload);
+        setInterval(refreshData, 3000);
+
         function createBubble() {
             const container = document.getElementById('bubble-container');
             if (!container) return;
@@ -103,134 +246,14 @@
             bubble.style.animationDelay = Math.random() * 3 + 's';
             bubble.style.background = `rgba(255, 255, 245, ${Math.random() * 0.5 + 0.2})`;
             container.appendChild(bubble);
-            
+
             setTimeout(() => {
                 if (bubble && bubble.remove) bubble.remove();
             }, 10000);
         }
-        
+
         setInterval(createBubble, 380);
         for (let i = 0; i < 12; i++) setTimeout(createBubble, i * 200);
-        
-        // Interactive live stats random updater (to simulate real-time)
-        let qualityIndex = 98.4;
-        let activeUsers = 1284;
-        let savedLitersVal = 2.3;
-        
-        function updateLiveStats() {
-            // Simulate small fluctuations for interactivity
-            qualityIndex = +(qualityIndex + (Math.random() - 0.5) * 0.3).toFixed(1);
-            if (qualityIndex > 99.5) qualityIndex = 99.2;
-            if (qualityIndex < 96.0) qualityIndex = 96.8;
-            
-            const qualityEl = document.getElementById('live-water-quality');
-            if (qualityEl) qualityEl.innerText = qualityIndex + '%';
-            
-            // active users gently increase
-            activeUsers += Math.floor(Math.random() * 3) - 1;
-            if (activeUsers < 1100) activeUsers = 1120;
-            if (activeUsers > 1450) activeUsers = 1430;
-            const userEl = document.getElementById('active-users-counter');
-            if (userEl) userEl.innerText = activeUsers.toLocaleString();
-            
-            // saved liters increment randomly
-            savedLitersVal += (Math.random() * 0.08);
-            if (savedLitersVal > 2.9) savedLitersVal = 2.4;
-            const litersEl = document.getElementById('saved-liters');
-            if (litersEl) litersEl.innerText = savedLitersVal.toFixed(1) + 'M';
-        }
-        
-        setInterval(updateLiveStats, 3800);
-        
-        // Add ripple effect to all buttons with class .ripple-effect dynamically
-        document.querySelectorAll('.ripple-effect, .glow-button, .card-hover').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                const rippleDiv = document.createElement('span');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size/2;
-                const y = e.clientY - rect.top - size/2;
-                rippleDiv.style.width = rippleDiv.style.height = size + 'px';
-                rippleDiv.style.position = 'absolute';
-                rippleDiv.style.top = y + 'px';
-                rippleDiv.style.left = x + 'px';
-                rippleDiv.style.background = 'radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 80%)';
-                rippleDiv.style.borderRadius = '50%';
-                rippleDiv.style.pointerEvents = 'none';
-                rippleDiv.style.transform = 'scale(0)';
-                rippleDiv.style.transition = 'transform 0.5s ease-out, opacity 0.6s';
-                rippleDiv.style.opacity = '1';
-                this.style.position = 'relative';
-                this.style.overflow = 'hidden';
-                this.appendChild(rippleDiv);
-                requestAnimationFrame(() => {
-                    rippleDiv.style.transform = 'scale(4)';
-                    rippleDiv.style.opacity = '0';
-                });
-                setTimeout(() => rippleDiv.remove(), 800);
-            });
-        });
-        
-        // Feature alert interactive
-        window.showFeatureAlert = (feature) => {
-            // Create a toast notification
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-800/90 backdrop-blur-lg text-white px-6 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-3 animate-bounce transition-all duration-500';
-            toast.innerHTML = `<i class="fas fa-info-circle text-cyan-200 text-xl"></i><span class="font-medium">✨ ${feature} feature — dive into smart water monitoring! ✨</span><i class="fas fa-water text-cyan-200"></i>`;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 2800);
-        };
-        
-        // Add floating effect to logo on hover + interactive card stat simulation
-        const logoImg = document.querySelector('img[alt="AquaWatch Logo"]');
-        if (logoImg) {
-            logoImg.addEventListener('mouseenter', () => {
-                logoImg.style.filter = 'drop-shadow(0 10px 18px rgba(0,150,180,0.5))';
-            });
-            logoImg.addEventListener('mouseleave', () => {
-                logoImg.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))';
-            });
-        }
-        
-        // Custom interactive mouse move on hero card (parallax light effect)
-        const heroCard = document.querySelector('.interactive-card');
-        if (heroCard) {
-            heroCard.addEventListener('mousemove', (e) => {
-                const rect = heroCard.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width;
-                const y = (e.clientY - rect.top) / rect.height;
-                const shadowX = (x - 0.5) * 20;
-                const shadowY = (y - 0.5) * 20;
-                heroCard.style.boxShadow = `${shadowX}px ${shadowY}px 40px rgba(0, 100, 130, 0.3)`;
-                const glow = heroCard.querySelector('.bg-blue-400/20');
-                if (glow) {
-                    glow.style.transform = `translate(${shadowX * 0.2}px, ${shadowY * 0.2}px)`;
-                }
-            });
-            heroCard.addEventListener('mouseleave', () => {
-                heroCard.style.boxShadow = '';
-            });
-        }
-        
-        // additional interactive wave text - update footer year
-        const footerYearSpan = document.querySelector('footer p');
-        if (footerYearSpan) {
-            // Already dynamic year in place, no action needed but ensure copyright is current
-        }
-        
-        // add interactive tooltip to stats
-        const statCards = document.querySelectorAll('.float-stat > div');
-        statCards.forEach(stat => {
-            stat.classList.add('cursor-help');
-            stat.setAttribute('title', 'Live ocean data simulation');
-        });
-        
-        // live water quality mini interactive
-        console.log('🌊 AquaWatch interactive ocean theme active — realtime bubbles & stats');
     </script>
-
 </body>
 </html>

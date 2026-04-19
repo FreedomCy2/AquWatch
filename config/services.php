@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'sensors' => [
+        'ingest_token' => env('SENSOR_INGEST_TOKEN'),
+        'accept_legacy_token' => env('SENSOR_ACCEPT_LEGACY_TOKEN', true),
+    ],
+
 ];

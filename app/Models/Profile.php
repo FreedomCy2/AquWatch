@@ -15,8 +15,14 @@ class Profile extends Model
         'city',
         'country',
         'birth_date',
+        'role',
+        'preferred_language',
         'company',
         'job_title',
+        'district',
+        'mukim',
+        'latitude',
+        'longitude',
         'website',
         'twitter',
         'linkedin',
@@ -26,6 +32,8 @@ class Profile extends Model
 
     protected $casts = [
         'birth_date' => 'date',
+        'latitude' => 'float',
+        'longitude' => 'float',
         'preferences' => 'array',
     ];
 
