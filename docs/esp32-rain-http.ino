@@ -9,11 +9,11 @@
 const int SENSOR_PIN = 34;
 
 // Wi-Fi credentials
-const char* WIFI_SSID = "DecoA";
-const char* WIFI_PASSWORD = "315321TKB";
+const char* WIFI_SSID = "Sanspenyu";
+const char* WIFI_PASSWORD = "ayam1234";
 
 // Laravel API settings
-const char* API_URL = "http://192.168.68.105:8082/api/ingest/rain";
+const char* API_URL = "http://172.17.42.94:8082/api/ingest/rain";
 const char* SENSOR_TOKEN = "aqw_1f8d7a9b3c4e6f2a91d0b7e5c3a8f6d4b2c9e1a7f3d5b8c0";
 const char* SENSOR_ID = "rain-esp32-01";
 
