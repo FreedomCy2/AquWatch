@@ -162,34 +162,34 @@
     </div>
     
     <!-- Header with interactive menu -->
-    <header class="relative z-20 w-full max-w-6xl mx-auto flex justify-between items-center py-6 px-6 md:px-8">
-        <div class="flex items-center gap-2 group cursor-pointer transition-all duration-300 hover:scale-105">
+    <header class="relative z-20 w-full max-w-6xl mx-auto flex flex-col gap-4 py-6 px-4 sm:px-6 md:px-8 md:flex-row md:justify-between md:items-center">
+        <div class="flex items-center gap-2 group cursor-pointer transition-all duration-300 hover:scale-105 self-start min-w-0">
 <img src="{{ asset('images/logo.png') }}" 
      alt="AquWatch Logo"
      class="h-10 w-auto drop-shadow-md">
-            <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquWatch</h1>
+            <h1 class="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent truncate">AquWatch</h1>
         </div>
         
         @if (Route::has('login'))
-            <nav class="flex items-center gap-3 md:gap-5">
+            <nav class="w-full md:w-auto flex flex-wrap items-center gap-2 sm:gap-3 md:gap-5">
                 <a href="{{ route('plans') }}"
-                   class="ripple-effect px-5 py-2.5 bg-white/70 backdrop-blur-sm text-blue-800 border border-blue-300 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300 font-medium flex items-center gap-2">
+                   class="ripple-effect px-4 py-2.5 bg-white/70 backdrop-blur-sm text-blue-800 border border-blue-300 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300 font-medium flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap">
                     <i class="fas fa-crown"></i> Upgrade
                 </a>
                 @auth
                     <a href="{{ route('dashboard') }}"
-                       class="ripple-effect px-5 py-2.5 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-xl shadow-lg hover:from-blue-700 hover:to-teal-700 transition-all duration-300 font-medium flex items-center gap-2">
+                       class="ripple-effect px-4 py-2.5 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-xl shadow-lg hover:from-blue-700 hover:to-teal-700 transition-all duration-300 font-medium flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap">
                         <i class="fas fa-chart-line"></i> Dashboard
                     </a>
                 @else
                     <a href="{{ route('login') }}"
-                       class="ripple-effect px-5 py-2.5 bg-white/70 backdrop-blur-sm text-blue-800 border border-blue-300 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300 font-medium flex items-center gap-2">
+                       class="ripple-effect px-4 py-2.5 bg-white/70 backdrop-blur-sm text-blue-800 border border-blue-300 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300 font-medium flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap">
                         <i class="fas fa-sign-in-alt"></i> Log in
                     </a>
                     
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}"
-                           class="ripple-effect px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 font-medium flex items-center gap-2">
+                           class="ripple-effect px-4 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 font-medium flex items-center justify-center gap-2 text-sm sm:text-base whitespace-nowrap">
                             <i class="fas fa-user-plus"></i> Register
                         </a>
                     @endif
@@ -239,15 +239,15 @@
                 
                 @guest
                     <!-- Interactive call to action buttons with icons and micro-interactions -->
-                    <div class="flex justify-center gap-5 flex-wrap">
+                    <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-5 items-stretch sm:items-center">
                         <a href="{{ route('plans') }}"
-                           class="group px-8 py-4 bg-white/90 backdrop-blur-sm text-blue-800 border-2 border-blue-300 rounded-2xl shadow-xl hover:shadow-2xl hover:border-teal-400 transition-all duration-300 font-bold text-lg flex items-center gap-3">
+                           class="group w-full sm:w-auto justify-center px-6 sm:px-8 py-4 bg-white/90 backdrop-blur-sm text-blue-800 border-2 border-blue-300 rounded-2xl shadow-xl hover:shadow-2xl hover:border-teal-400 transition-all duration-300 font-bold text-base sm:text-lg flex items-center gap-3">
                             <i class="fas fa-crown text-amber-500 group-hover:scale-110 transition-transform"></i>
                             View Plans
                         </a>
 
                         <a href="{{ route('dashboard') }}"
-                           class="glow-button group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 font-bold text-lg flex items-center gap-3 overflow-hidden">
+                           class="glow-button group relative w-full sm:w-auto justify-center px-6 sm:px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-2xl shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 font-bold text-base sm:text-lg flex items-center gap-3 overflow-hidden">
                             <i class="fas fa-water group-hover:animate-wiggle text-xl"></i>
                             <span>Get Started</span>
                             <i class="fas fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
@@ -256,7 +256,7 @@
                         
                         @if (Route::has('register'))
                             <a href="{{ route('register') }}"
-                               class="group px-8 py-4 bg-white/90 backdrop-blur-sm text-blue-800 border-2 border-blue-300 rounded-2xl shadow-xl hover:shadow-2xl hover:border-teal-400 transition-all duration-300 font-bold text-lg flex items-center gap-3">
+                                         class="group w-full sm:w-auto justify-center px-6 sm:px-8 py-4 bg-white/90 backdrop-blur-sm text-blue-800 border-2 border-blue-300 rounded-2xl shadow-xl hover:shadow-2xl hover:border-teal-400 transition-all duration-300 font-bold text-base sm:text-lg flex items-center gap-3">
                                 <i class="fas fa-id-card group-hover:scale-110 transition-transform"></i>
                                 Create Account
                                 <i class="fas fa-plus-circle text-sm opacity-70 group-hover:opacity-100"></i>
@@ -268,7 +268,7 @@
                 @auth
                     <div class="flex justify-center">
                         <a href="{{ route('dashboard') }}"
-                           class="px-10 py-4 bg-gradient-to-r from-teal-500 to-blue-600 text-white rounded-2xl shadow-2xl hover:scale-105 transition-all duration-300 font-bold text-xl flex items-center gap-3">
+                           class="w-full sm:w-auto justify-center px-8 sm:px-10 py-4 bg-gradient-to-r from-teal-500 to-blue-600 text-white rounded-2xl shadow-2xl hover:scale-105 transition-all duration-300 font-bold text-lg sm:text-xl flex items-center gap-3">
                             <i class="fas fa-tachometer-alt"></i> Go to Dashboard
                         </a>
                     </div>

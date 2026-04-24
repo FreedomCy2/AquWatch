@@ -73,26 +73,26 @@
                 <p class="text-blue-800/80 mt-1">View your account details here.</p>
             </div>
 
-            <div class="flex gap-3">
+            <div class="flex flex-wrap gap-3 w-full md:w-auto">
                 <a href="{{ route('dashboard') }}"
-                   class="px-5 py-2.5 bg-white/80 border border-white rounded-xl shadow text-blue-900 hover:bg-white transition">
+                   class="w-full sm:w-auto text-center px-5 py-2.5 bg-white/80 border border-white rounded-xl shadow text-blue-900 hover:bg-white transition whitespace-nowrap">
                     Back to Dashboard
                 </a>
 
                 <a href="{{ route('profile.legacy.edit') }}"
-                   class="px-5 py-2.5 bg-cyan-600 text-white rounded-xl shadow hover:bg-cyan-700 transition">
+                   class="w-full sm:w-auto text-center px-5 py-2.5 bg-cyan-600 text-white rounded-xl shadow hover:bg-cyan-700 transition whitespace-nowrap">
                     Edit Profile
                 </a>
 
                 <a href="{{ route('account.settings.edit') }}"
-                   class="px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition">
+                   class="w-full sm:w-auto text-center px-5 py-2.5 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition whitespace-nowrap">
                     Settings
                 </a>
 
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout') }}" class="w-full sm:w-auto">
                     @csrf
                     <button type="submit"
-                            class="px-5 py-2.5 bg-red-500 text-white rounded-xl shadow hover:bg-red-600 transition">
+                            class="w-full sm:w-auto px-5 py-2.5 bg-red-500 text-white rounded-xl shadow hover:bg-red-600 transition whitespace-nowrap">
                         Logout
                     </button>
                 </form>
@@ -119,7 +119,7 @@
                     @endif
 
                     <h2 class="mt-4 text-2xl font-bold text-blue-900">{{ $user->name }}</h2>
-                    <p class="text-blue-700">{{ $user->email }}</p>
+                    <p class="text-blue-700 break-all">{{ $user->email }}</p>
                 </div>
             </div>
 
@@ -134,7 +134,7 @@
 
                     <div class="bg-sky-50 rounded-xl px-4 py-3">
                         <p class="text-xs text-blue-600 font-semibold">Email</p>
-                        <p class="text-blue-900">{{ $user->email }}</p>
+                        <p class="text-blue-900 break-all">{{ $user->email }}</p>
                     </div>
 
                     <div class="bg-sky-50 rounded-xl px-4 py-3">
@@ -181,7 +181,7 @@
 
                     <div class="md:col-span-2 bg-sky-50 rounded-xl px-4 py-3">
                         <p class="text-xs text-blue-600 font-semibold">Bio</p>
-                        <p class="text-blue-900">{{ $profile->bio ?? 'Not set' }}</p>
+                        <p class="text-blue-900 break-words">{{ $profile->bio ?? 'Not set' }}</p>
                     </div>
                 </div>
             </div>

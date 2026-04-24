@@ -33,24 +33,24 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-sky-100 via-cyan-100 to-teal-100 text-slate-900">
-    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-        <a href="{{ url('/') }}" class="flex items-center gap-3">
+<body class="min-h-screen overflow-x-hidden bg-gradient-to-br from-sky-100 via-cyan-100 to-teal-100 text-slate-900">
+    <header class="max-w-6xl mx-auto px-4 py-6 sm:px-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <a href="{{ url('/') }}" class="flex items-center gap-3 self-start min-w-0">
             <img src="{{ asset('images/logo.png') }}" alt="AquWatch Logo" class="h-10 w-auto">
-            <span class="text-2xl font-extrabold bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquWatch</span>
+            <span class="text-xl sm:text-2xl font-extrabold bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent truncate">AquWatch</span>
         </a>
 
-        <div class="flex items-center gap-3">
-            <a href="{{ url('/') }}" class="px-4 py-2 rounded-lg bg-white/70 border border-cyan-200 text-cyan-800 hover:bg-white transition">Home</a>
+        <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center sm:gap-3">
+            <a href="{{ url('/') }}" class="text-center px-3 sm:px-4 py-2 rounded-lg bg-white/70 border border-cyan-200 text-cyan-800 hover:bg-white transition">Home</a>
             @auth
-                <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700 transition">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="text-center px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700 transition">Dashboard</a>
             @else
-                <a href="{{ route('login') }}" class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700 transition">Login</a>
+                <a href="{{ route('login') }}" class="text-center px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700 transition">Login</a>
             @endauth
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-6 pb-14">
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-14">
         <section class="text-center mb-10">
             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs bg-white/70 border border-cyan-200 text-cyan-800 badge-pulse">
                 <i class="fas fa-droplet"></i>
