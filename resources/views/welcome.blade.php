@@ -164,7 +164,7 @@
     <!-- Header with interactive menu -->
     <header class="relative z-20 w-full max-w-6xl mx-auto flex justify-between items-center py-6 px-6 md:px-8">
         <div class="flex items-center gap-2 group cursor-pointer transition-all duration-300 hover:scale-105">
-<img src="{{ asset('images/Logo.png') }}" 
+<img src="{{ asset('images/logo.png') }}" 
      alt="AquWatch Logo"
      class="h-10 w-auto drop-shadow-md">
             <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquWatch</h1>

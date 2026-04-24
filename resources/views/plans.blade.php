@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>AquWatch Plans</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,7 +36,7 @@
 <body class="min-h-screen bg-gradient-to-br from-sky-100 via-cyan-100 to-teal-100 text-slate-900">
     <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
         <a href="{{ url('/') }}" class="flex items-center gap-3">
-            <img src="{{ asset('images/Logo.png') }}" alt="AquWatch Logo" class="h-10 w-auto">
+            <img src="{{ asset('images/logo.png') }}" alt="AquWatch Logo" class="h-10 w-auto">
             <span class="text-2xl font-extrabold bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquWatch</span>
         </a>
 
