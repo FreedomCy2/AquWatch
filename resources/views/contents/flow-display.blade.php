@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flow Monitoring - AquWatch</title>
   
     <!-- Tailwind CSS CDN -->
@@ -78,29 +78,32 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 <div class="glass-card rounded-2xl p-4 shadow-lg">
-                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Flow Right Now</p>
-                    <p id="kpi-flow" class="text-3xl font-bold text-cyan-950 mt-1">0.000</p>
+                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Sensor 1 Flow</p>
+                    <p id="kpi-flow-a" class="text-3xl font-bold text-cyan-950 mt-1">0.000</p>
                     <p class="text-cyan-900/70 text-sm">L/min</p>
+                    <p id="kpi-sensor-a" class="text-cyan-900/70 text-sm mt-1">Sensor: -</p>
+                    <p id="kpi-total-a" class="text-cyan-900/80 text-sm">Total: 0 mL</p>
+                    <p id="kpi-status-a" class="text-lg font-bold text-cyan-950 mt-1">Checking...</p>
                 </div>
 
                 <div class="glass-card rounded-2xl p-4 shadow-lg">
-                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Total Water Measured</p>
-                    <p id="kpi-total" class="text-3xl font-bold text-cyan-950 mt-1">0</p>
-                    <p class="text-cyan-900/70 text-sm">mL</p>
+                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Sensor 2 Flow</p>
+                    <p id="kpi-flow-b" class="text-3xl font-bold text-cyan-950 mt-1">0.000</p>
+                    <p class="text-cyan-900/70 text-sm">L/min</p>
+                    <p id="kpi-sensor-b" class="text-cyan-900/70 text-sm mt-1">Sensor: -</p>
+                    <p id="kpi-total-b" class="text-cyan-900/80 text-sm">Total: 0 mL</p>
+                    <p id="kpi-status-b" class="text-lg font-bold text-cyan-950 mt-1">Checking...</p>
                 </div>
 
                 <div class="glass-card rounded-2xl p-4 shadow-lg">
-                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Water Status</p>
-                    <p id="kpi-status" class="text-2xl font-bold text-cyan-950 mt-1">Checking...</p>
-                    <p id="kpi-sensor" class="text-cyan-900/70 text-sm">Sensor: -</p>
-                </div>
-
-                <div class="glass-card rounded-2xl p-4 shadow-lg">
-                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Last Updated</p>
-                    <p id="kpi-time" class="text-lg font-bold text-cyan-950 mt-1">-</p>
-                    <p class="text-cyan-900/70 text-sm">time of latest reading</p>
+                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Combined Flow</p>
+                    <p id="kpi-flow-combined" class="text-3xl font-bold text-cyan-950 mt-1">0.000</p>
+                    <p class="text-cyan-900/70 text-sm">L/min</p>
+                    <p id="kpi-total-combined" class="text-cyan-900/80 text-sm mt-1">Total: 0 mL</p>
+                    <p id="kpi-time" class="text-cyan-900/80 text-sm">Updated: -</p>
+                    <p id="kpi-status-combined" class="text-lg font-bold text-cyan-950 mt-1">Checking...</p>
                 </div>
             </div>
 
@@ -151,30 +154,62 @@
             });
         }
 
-        function render(payload) {
-            const latest = payload?.latest;
-            const flowLpm = Number(latest?.flow_lpm ?? 0);
+        function statusFromFlow(flowLpm, isRecent) {
             const LOW_FLOW_THRESHOLD = 0.2;
             const HIGH_FLOW_THRESHOLD = 3.0;
-            document.getElementById('kpi-flow').textContent = flowLpm.toFixed(3);
-            document.getElementById('kpi-total').textContent = Number(latest?.total_ml ?? 0).toLocaleString();
-            document.getElementById('kpi-sensor').textContent = `Sensor: ${latest?.sensor_id ?? '-'}`;
-            document.getElementById('kpi-time').textContent = formatTime(latest?.measured_at);
 
-            const statusElement = document.getElementById('kpi-status');
-            if (!latest?.is_recent) {
-                statusElement.textContent = 'No recent data';
-                statusElement.className = 'text-2xl font-bold text-slate-700 mt-1';
-            } else if (flowLpm < LOW_FLOW_THRESHOLD) {
-                statusElement.textContent = 'Low Water Flow';
-                statusElement.className = 'text-2xl font-bold text-amber-700 mt-1';
-            } else if (flowLpm <= HIGH_FLOW_THRESHOLD) {
-                statusElement.textContent = 'Normal Flow';
-                statusElement.className = 'text-2xl font-bold text-emerald-700 mt-1';
-            } else {
-                statusElement.textContent = 'Too Much Flow';
-                statusElement.className = 'text-2xl font-bold text-rose-700 mt-1';
+            if (!isRecent) {
+                return { label: 'No recent data', className: 'text-lg font-bold text-slate-700 mt-1' };
             }
+
+            if (flowLpm < LOW_FLOW_THRESHOLD) {
+                return { label: 'Low Water Flow', className: 'text-lg font-bold text-amber-700 mt-1' };
+            }
+
+            if (flowLpm <= HIGH_FLOW_THRESHOLD) {
+                return { label: 'Normal Flow', className: 'text-lg font-bold text-emerald-700 mt-1' };
+            }
+
+            return { label: 'Too Much Flow', className: 'text-lg font-bold text-rose-700 mt-1' };
+        }
+
+        function render(payload) {
+            const sensors = Array.isArray(payload?.sensors) ? payload.sensors : [];
+            const sensorA = sensors[0] ?? null;
+            const sensorB = sensors[1] ?? null;
+            const combined = payload?.combined ?? null;
+
+            const flowA = Number(sensorA?.flow_lpm ?? 0);
+            const flowB = Number(sensorB?.flow_lpm ?? 0);
+            const flowCombined = Number(combined?.flow_lpm ?? 0);
+
+            document.getElementById('kpi-flow-a').textContent = flowA.toFixed(3);
+            document.getElementById('kpi-sensor-a').textContent = `Sensor: ${sensorA?.sensor_id ?? '-'}`;
+            document.getElementById('kpi-total-a').textContent = `Total: ${Number(sensorA?.total_ml ?? 0).toLocaleString()} mL`;
+
+            document.getElementById('kpi-flow-b').textContent = flowB.toFixed(3);
+            document.getElementById('kpi-sensor-b').textContent = `Sensor: ${sensorB?.sensor_id ?? '-'}`;
+            document.getElementById('kpi-total-b').textContent = `Total: ${Number(sensorB?.total_ml ?? 0).toLocaleString()} mL`;
+
+            document.getElementById('kpi-flow-combined').textContent = flowCombined.toFixed(3);
+            document.getElementById('kpi-total-combined').textContent = `Total: ${Number(combined?.total_ml ?? 0).toLocaleString()} mL`;
+            document.getElementById('kpi-time').textContent = `Updated: ${formatTime(combined?.measured_at)}`;
+
+            const statusA = statusFromFlow(flowA, Boolean(sensorA?.is_recent));
+            const statusB = statusFromFlow(flowB, Boolean(sensorB?.is_recent));
+            const statusCombined = statusFromFlow(flowCombined, Boolean(combined?.is_recent));
+
+            const statusAElement = document.getElementById('kpi-status-a');
+            statusAElement.textContent = statusA.label;
+            statusAElement.className = statusA.className;
+
+            const statusBElement = document.getElementById('kpi-status-b');
+            statusBElement.textContent = statusB.label;
+            statusBElement.className = statusB.className;
+
+            const statusCombinedElement = document.getElementById('kpi-status-combined');
+            statusCombinedElement.textContent = statusCombined.label;
+            statusCombinedElement.className = statusCombined.className;
         }
 
         async function refreshData() {
@@ -192,9 +227,17 @@
                 const payload = await response.json();
                 render(payload);
             } catch {
-                const statusElement = document.getElementById('kpi-status');
-                statusElement.textContent = 'Connection issue';
-                statusElement.className = 'text-2xl font-bold text-rose-700 mt-1';
+                const statusAElement = document.getElementById('kpi-status-a');
+                statusAElement.textContent = 'Connection issue';
+                statusAElement.className = 'text-lg font-bold text-rose-700 mt-1';
+
+                const statusBElement = document.getElementById('kpi-status-b');
+                statusBElement.textContent = 'Connection issue';
+                statusBElement.className = 'text-lg font-bold text-rose-700 mt-1';
+
+                const statusCombinedElement = document.getElementById('kpi-status-combined');
+                statusCombinedElement.textContent = 'Connection issue';
+                statusCombinedElement.className = 'text-lg font-bold text-rose-700 mt-1';
             }
         }
 

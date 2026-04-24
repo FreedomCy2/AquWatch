@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - AquWatch | Intelligent Water Monitoring</title>
     
     <!-- Tailwind CSS CDN -->
@@ -183,7 +183,7 @@
                 <div class="text-center mb-8">
                     <div class="relative inline-block group">
                         <div class="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl scale-110 group-hover:scale-125 transition-transform duration-700"></div>
-                        <img src="{{ asset('images/Logo.png') }}" 
+                        <img src="{{ asset('images/logo.png') }}" 
                             alt="AquWatch Logo"
                             class="relative mx-auto mb-5 w-28 h-28 object-contain rounded-2xl shadow-2xl border-3 border-white/70 transition-all duration-500 group-hover:scale-105 logo-glow">
                     </div>

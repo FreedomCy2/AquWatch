@@ -16,6 +16,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'plan_tier',
+        'plan_changed_at',
     ];
 
     protected $hidden = [
@@ -30,6 +32,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'plan_changed_at' => 'datetime',
         ];
     }
 
@@ -53,5 +56,10 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn (string $part): string => strtoupper(substr($part, 0, 1)))
             ->implode('');
+    }
+
+    public function isPro(): bool
+    {
+        return strtolower((string) $this->plan_tier) === 'pro';
     }
 }

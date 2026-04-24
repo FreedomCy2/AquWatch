@@ -3,11 +3,17 @@
     use App\Models\FloodReading;
     use App\Models\RainReading;
 
-    $dashboardLatestFlow = FlowReading::query()
+    $dashboardLatestFlowPerSensor = FlowReading::query()
+        ->select(['sensor_id', 'flow_lpm', 'total_ml', 'created_at'])
         ->orderByDesc('created_at')
-        ->first();
+        ->get()
+        ->unique('sensor_id')
+        ->take(2)
+        ->values();
 
-    $dashboardFlowLpm = round((float) ($dashboardLatestFlow?->flow_lpm ?? 0), 3);
+    $dashboardFlowLpm = round((float) $dashboardLatestFlowPerSensor->sum(function ($reading): float {
+        return (float) $reading->flow_lpm;
+    }), 3);
     $dashboardFlowBarPercent = min(100, max(0, ($dashboardFlowLpm / 20) * 100));
 
     $todayStart = now()->startOfDay();
@@ -23,7 +29,13 @@
     $dashboardDailyMl = max(0, (int) ($todayLast?->total_ml ?? 0) - (int) ($todayFirst?->total_ml ?? 0));
     $dashboardDailyL = $dashboardDailyMl / 1000;
 
-    $dashboardHasRecentFlow = $dashboardLatestFlow?->created_at?->greaterThanOrEqualTo(now()->subSeconds(15)) ?? false;
+    $dashboardActiveFlowSensors = $dashboardLatestFlowPerSensor
+        ->filter(function ($reading): bool {
+            return $reading->created_at?->greaterThanOrEqualTo(now()->subSeconds(15)) ?? false;
+        })
+        ->count();
+
+    $dashboardHasRecentFlow = $dashboardActiveFlowSensors > 0;
 
     $dashboardLatestRain = RainReading::query()
         ->orderByDesc('created_at')
@@ -64,14 +76,62 @@
         'LEVEL 1 DETECTED' => 38,
         default => 12,
     };
-    $dashboardActiveSensors = ((int) $dashboardHasRecentFlow) + ((int) $dashboardHasRecentRain) + ((int) $dashboardHasRecentFlood);
+    $dashboardActiveSensors = $dashboardActiveFlowSensors + ((int) $dashboardHasRecentRain) + ((int) $dashboardHasRecentFlood);
+
+    $dashboardRecentAlerts = collect();
+
+    if ($dashboardHasRecentFlood && $dashboardLatestFlood) {
+        $dashboardRecentAlerts->push([
+            'icon' => 'fa-water text-blue-500',
+            'text' => 'Flood sensor: '.$dashboardFloodCardState.' (rise '.number_format($dashboardFloodRiseSec).'s)',
+            'time' => $dashboardLatestFlood->created_at,
+        ]);
+    }
+
+    if ($dashboardHasRecentRain && $dashboardLatestRain) {
+        $dashboardRecentAlerts->push([
+            'icon' => 'fa-cloud-rain text-blue-500',
+            'text' => 'Rain sensor: '.$dashboardRainLabel.' (value '.number_format($dashboardRainAnalog).')',
+            'time' => $dashboardLatestRain->created_at,
+        ]);
+    }
+
+    if ($dashboardLatestFlowPerSensor->isNotEmpty()) {
+        $dashboardRecentAlerts->push([
+            'icon' => 'fa-tint text-cyan-500',
+            'text' => 'Flow rate: '.number_format($dashboardFlowLpm, 3).' L/min (combined)',
+            'time' => $dashboardLatestFlowPerSensor->max('created_at'),
+        ]);
+    }
+
+    $dashboardRecentAlerts = $dashboardRecentAlerts
+        ->sortByDesc('time')
+        ->take(4)
+        ->values();
+
+    $alertsSeenAtRaw = session('alerts_seen_at');
+    $alertsSeenAt = is_string($alertsSeenAtRaw) && $alertsSeenAtRaw !== ''
+        ? \Illuminate\Support\Carbon::parse($alertsSeenAtRaw)
+        : null;
+
+    $dashboardRecentAlertCount = $dashboardRecentAlerts
+        ->filter(function (array $alert) use ($alertsSeenAt): bool {
+            $time = $alert['time'] ?? null;
+
+            if (! $time) {
+                return false;
+            }
+
+            return ! $alertsSeenAt || $time->greaterThan($alertsSeenAt);
+        })
+        ->count();
 @endphp
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - AquWatch | Ocean Intelligence</title>
 
     <!-- Tailwind CSS CDN -->
@@ -239,26 +299,57 @@
     </div>
 
     <!-- Header -->
-<header class="relative z-20 flex justify-between items-center w-full max-w-7xl mx-auto px-6 py-5">        <div class="flex items-center gap-3 group cursor-pointer transition-all duration-300">
-<img src="{{ asset('images/Logo.png') }}" 
+<header class="relative z-20 flex flex-col md:flex-row justify-between md:items-center w-full max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-5 gap-3">        <div class="flex items-center gap-2 md:gap-3 group cursor-pointer transition-all duration-300">
+<img src="{{ asset('images/logo.png') }}" 
      alt="AquWatch Logo"
      class="h-10 w-auto drop-shadow-md">
-            <h1 class="text-2xl font-black bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquWatch</h1>
-            <span class="ml-2 text-xs bg-white/40 backdrop-blur-sm px-3 py-1 rounded-full text-blue-700">
+            <h1 class="text-xl md:text-2xl font-black bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquWatch</h1>
+            <span class="ml-1 md:ml-2 text-xs bg-white/40 backdrop-blur-sm px-2 md:px-3 py-1 rounded-full text-blue-700">
                 <i class="fas fa-chart-line text-xs"></i> LIVE
             </span>
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center justify-end gap-2 md:gap-4 w-full md:w-auto">
             <div class="hidden md:flex items-center gap-2 bg-white/40 backdrop-blur-sm px-4 py-2 rounded-full text-blue-800 text-sm">
                 <i class="fas fa-clock"></i>
                 <span id="live-time">--:-- --</span>
             </div>
 
+            <a href="{{ route('contents.notifications') }}"
+               class="relative flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition"
+               title="Notifications">
+                <i class="fas fa-bell text-amber-600"></i>
+                <span class="hidden sm:inline">Notifications</span>
+                @if ($dashboardRecentAlertCount > 0)
+                    <span class="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                        {{ $dashboardRecentAlertCount }}
+                    </span>
+                @endif
+            </a>
+
+            @if (Auth::user()->isPro())
+                <a href="{{ route('contents.ai-chat') }}"
+                   class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
+                    <i class="fas fa-comments text-cyan-600"></i>
+                    <span class="hidden sm:inline">AI Chat</span>
+                </a>
+                <a href="{{ route('contents.ai-insights') }}"
+                   class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
+                    <i class="fas fa-robot text-cyan-600"></i>
+                    <span class="hidden sm:inline">AI Insights</span>
+                </a>
+            @else
+                <a href="{{ route('plans') }}"
+                   class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
+                    <i class="fas fa-lock text-amber-600"></i>
+                    <span class="hidden sm:inline">Unlock AI</span>
+                </a>
+            @endif
+
             <a href="{{ route('plans') }}"
-               class="flex items-center gap-2 bg-white/80 hover:bg-white px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
+               class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
                 <i class="fas fa-crown text-amber-500"></i>
-                <span class="hidden sm:inline">Upgrade</span>
+                <span class="hidden sm:inline">{{ Auth::user()->isPro() ? 'Pro Active' : 'Upgrade' }}</span>
             </a>
 
             <!-- Profile Dropdown -->
@@ -323,7 +414,7 @@
     </header>
 
     <!-- Main -->
-<main class="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 pb-20">
+<main class="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 py-6 pb-20">
         <!-- Welcome Banner -->
         <div class="mb-8">
             <div class="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 backdrop-blur-sm rounded-2xl p-6 border border-white/50">
@@ -444,31 +535,6 @@
 
         </div>
 
-        <!-- Alerts -->
-        <div class="bg-white/50 backdrop-blur-sm rounded-2xl p-5 border border-white/60">
-            <div class="flex items-center gap-2 mb-3">
-                <i class="fas fa-bell text-amber-500"></i>
-                <h4 class="font-bold text-blue-900">Recent Alerts</h4>
-                <span class="text-xs bg-blue-100 px-2 py-0.5 rounded-full text-blue-700">Live</span>
-            </div>
-            <div class="space-y-2" id="alert-container">
-                <div class="flex items-center gap-3 text-sm text-blue-800">
-                    <i class="fas fa-check-circle text-green-500"></i>
-                    <span>All systems operational</span>
-                    <span class="text-xs text-blue-500 ml-auto">Just now</span>
-                </div>
-                <div class="flex items-center gap-3 text-sm text-blue-800">
-                    <i class="fas fa-tint text-cyan-500"></i>
-                    <span>Flow rate stable at 142 L/s</span>
-                    <span class="text-xs text-blue-500 ml-auto">5 min ago</span>
-                </div>
-                <div class="flex items-center gap-3 text-sm text-blue-800">
-                    <i class="fas fa-cloud-rain text-blue-500"></i>
-                    <span>Light rainfall detected in catchment area</span>
-                    <span class="text-xs text-blue-500 ml-auto">12 min ago</span>
-                </div>
-            </div>
-        </div>
     </main>
 
     <!-- Footer -->
@@ -555,7 +621,7 @@
         let rainAnalog = Number(@json($dashboardRainAnalog));
         let floodStatusText = @json($dashboardFloodCardState);
         let floodRiseSec = Number(@json($dashboardFloodRiseSec));
-        let flowSensorIsRecent = Boolean(@json($dashboardHasRecentFlow));
+        let flowActiveSensors = Number(@json($dashboardActiveFlowSensors));
         let rainSensorIsRecent = Boolean(@json($dashboardHasRecentRain));
         let floodSensorIsRecent = Boolean(@json($dashboardHasRecentFlood));
         let dailyVolumeL = Number(@json(round($dashboardDailyL, 2)));
@@ -566,7 +632,7 @@
                 return;
             }
 
-            const activeCount = (flowSensorIsRecent ? 1 : 0)
+            const activeCount = flowActiveSensors
                 + (rainSensorIsRecent ? 1 : 0)
                 + (floodSensorIsRecent ? 1 : 0);
 
@@ -635,8 +701,9 @@
                 }
 
                 const payload = await response.json();
-                const latest = payload?.latest;
-                flowRate = Number(latest?.flow_lpm ?? 0);
+                const sensors = Array.isArray(payload?.sensors) ? payload.sensors : [];
+                const combined = payload?.combined ?? null;
+                flowRate = Number(combined?.flow_lpm ?? 0);
 
                 const flowRateEl = document.getElementById('flow-rate');
                 const flowRateDetailEl = document.getElementById('flow-rate-detail');
@@ -647,19 +714,19 @@
                 if (flowRateEl) flowRateEl.textContent = flowRate.toFixed(3) + ' L/min';
                 if (flowRateDetailEl) flowRateDetailEl.textContent = flowRate.toFixed(3) + ' L/min';
 
-                dailyVolumeL = Number((latest?.total_ml ?? 0) / 1000);
+                dailyVolumeL = Number((combined?.total_ml ?? 0) / 1000);
                 if (dailyVolumeEl) dailyVolumeEl.textContent = dailyVolumeL.toFixed(2) + ' L';
 
                 const flowPercent = Math.min(100, (flowRate / 20) * 100);
                 if (flowBarEl) flowBarEl.style.width = flowPercent + '%';
 
                 if (flowStateBadgeEl) {
-                    if (latest?.is_recent) {
-                        flowSensorIsRecent = true;
+                    flowActiveSensors = sensors.filter(sensor => Boolean(sensor?.is_recent)).length;
+
+                    if (flowActiveSensors > 0) {
                         flowStateBadgeEl.className = 'bg-emerald-100/80 rounded-full px-3 py-1 text-xs text-emerald-700';
-                        flowStateBadgeEl.innerHTML = '<i class="fas fa-tachometer-alt"></i> Live';
+                        flowStateBadgeEl.innerHTML = `<i class="fas fa-tachometer-alt"></i> Live (${flowActiveSensors}/${sensors.length || 2})`;
                     } else {
-                        flowSensorIsRecent = false;
                         flowStateBadgeEl.className = 'bg-slate-100/80 rounded-full px-3 py-1 text-xs text-slate-700';
                         flowStateBadgeEl.innerHTML = '<i class="fas fa-tachometer-alt"></i> No recent data';
                     }
@@ -794,35 +861,11 @@
             }
         }
 
-        function simulateDataUpdate() {
+        function updateChartSeries() {
             if (chart) {
                 const newFlowData = [...chart.data.datasets[0].data.slice(1), Math.round(flowRate)];
                 chart.data.datasets[0].data = newFlowData;
                 chart.update('none');
-            }
-
-            const alerts = [
-                '<i class="fas fa-check-circle text-green-500"></i> System health: Optimal',
-                '<i class="fas fa-tint text-cyan-500"></i> Flow rate stable at ' + flowRate.toFixed(3) + ' L/min',
-                '<i class="fas fa-cloud-rain text-blue-500"></i> Rain sensor: ' + rainStatusText + ' (value ' + rainAnalog.toLocaleString() + ')',
-                '<i class="fas fa-water text-blue-500"></i> Flood sensor: ' + floodStatusText + ' (rise ' + floodRiseSec.toLocaleString() + 's)'
-            ];
-
-            const alertContainer = document.getElementById('alert-container');
-            if (alertContainer) {
-                const randomAlert = alerts[Math.floor(Math.random() * alerts.length)];
-                const newAlert = document.createElement('div');
-                newAlert.className = 'flex items-center gap-3 text-sm text-blue-800 animate-pulse';
-                newAlert.innerHTML = randomAlert + '<span class="text-xs text-blue-500 ml-auto">Just now</span>';
-                alertContainer.insertBefore(newAlert, alertContainer.firstChild);
-
-                if (alertContainer.children.length > 4) {
-                    alertContainer.removeChild(alertContainer.lastChild);
-                }
-
-                setTimeout(() => {
-                    newAlert.classList.remove('animate-pulse');
-                }, 1000);
             }
         }
 
@@ -833,7 +876,7 @@
         setInterval(refreshFlowSummary, 5000);
         setInterval(refreshRainSummary, 5000);
         setInterval(refreshFloodSummary, 5000);
-        setInterval(simulateDataUpdate, 4000);
+        setInterval(updateChartSeries, 4000);
 
         // ========== RIPPLE EFFECT ==========
         document.querySelectorAll('.ripple-btn, .dashboard-card, button').forEach(btn => {

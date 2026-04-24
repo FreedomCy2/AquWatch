@@ -1,19 +1,14 @@
 /*
-  ESP32 + G1/2 Water Flow Sensor (YF-S201 style)
+  ESP32 + 2x G1/2 Water Flow Sensors (YF-S201 style)
   Direct Wi-Fi HTTP posting to Laravel API.
+
+  Wiring for 2 sensors:
+  - Both sensor VCC wires can be split to the same 5V rail.
+  - Both sensor GND wires must go to ESP32 GND (common ground).
+  - Each sensor signal must use a separate GPIO pin.
 
   API endpoint expected:
   POST http://aquwatch.test/api/ingest/flow
-  Headers:
-    Content-Type: application/json
-    X-Sensor-Token: <SENSOR_INGEST_TOKEN>
-  Body:
-    {
-      "sensor_id": "flow-esp32-01",
-      "flow_lpm": 1.23,
-      "total_ml": 4567,
-      "measured_at": "2026-04-19T07:50:11Z"
-    }
 */
 
 #include <WiFi.h>
@@ -21,28 +16,38 @@
 #include <time.h>
 
 #define LED_BUILTIN 2
-#define SENSOR_PIN 27
+#define SENSOR_A_PIN 27
+#define SENSOR_B_PIN 26
 
 // Wi-Fi credentials
-const char* WIFI_SSID = "Sanspenyu";
-const char* WIFI_PASSWORD = "ayam1234";
+const char* WIFI_SSID = "DecoA";
+const char* WIFI_PASSWORD = "315321TKB";
 
 // Laravel API settings
-const char* API_URL = "http://172.17.42.94:8082/api/ingest/flow";
+const char* API_URL = "http://192.168.68.105:8082/api/ingest/flow";
 const char* SENSOR_TOKEN = "aqw_1f8d7a9b3c4e6f2a91d0b7e5c3a8f6d4b2c9e1a7f3d5b8c0";
-const char* SENSOR_ID = "flow-esp32-01";
+const char* SENSOR_A_ID = "flow-esp32-p27";
+const char* SENSOR_B_ID = "flow-esp32-p26";
 
 const uint32_t SAMPLE_INTERVAL_MS = 1000;
-const uint32_t WIFI_RETRY_MS = 10000;
+const uint32_t WIFI_RETRY_MS = 12000;
+const uint32_t WIFI_CONNECT_GRACE_MS = 8000;
 const float CALIBRATION_FACTOR = 4.5f; // pulses-per-second / 4.5 = L/min
 
-volatile uint32_t pulseCount = 0;
+volatile uint32_t pulseCountA = 0;
+volatile uint32_t pulseCountB = 0;
 
 uint32_t lastSampleMs = 0;
 uint32_t lastWifiRetryMs = 0;
-float flowRateLMin = 0.0f;
-uint32_t flowMilliLitres = 0;
-uint64_t totalMilliLitres = 0;
+uint32_t wifiConnectStartedMs = 0;
+float flowRateA_LMin = 0.0f;
+float flowRateB_LMin = 0.0f;
+float combinedFlowRateLMin = 0.0f;
+uint32_t flowA_MilliLitres = 0;
+uint32_t flowB_MilliLitres = 0;
+uint64_t totalA_MilliLitres = 0;
+uint64_t totalB_MilliLitres = 0;
+uint64_t totalCombinedMilliLitres = 0;
 wl_status_t lastWifiStatus = WL_IDLE_STATUS;
 
 const char* wifiStatusText(wl_status_t status) {
@@ -58,12 +63,17 @@ const char* wifiStatusText(wl_status_t status) {
   }
 }
 
-void IRAM_ATTR pulseCounter() {
-  pulseCount++;
+void IRAM_ATTR pulseCounterA() {
+  pulseCountA++;
+}
+
+void IRAM_ATTR pulseCounterB() {
+  pulseCountB++;
 }
 
 void connectWifiIfNeeded() {
   wl_status_t status = WiFi.status();
+  uint32_t now = millis();
 
   if (status != lastWifiStatus) {
     Serial.print("[WiFi] Status changed: ");
@@ -75,6 +85,7 @@ void connectWifiIfNeeded() {
       Serial.println(WiFi.localIP());
       Serial.print("[WiFi] RSSI: ");
       Serial.println(WiFi.RSSI());
+      wifiConnectStartedMs = 0;
     }
   }
 
@@ -82,19 +93,27 @@ void connectWifiIfNeeded() {
     return;
   }
 
-  uint32_t now = millis();
+  if (wifiConnectStartedMs > 0 && (now - wifiConnectStartedMs) < WIFI_CONNECT_GRACE_MS) {
+    return;
+  }
+
   if (now - lastWifiRetryMs < WIFI_RETRY_MS) {
     return;
   }
 
   lastWifiRetryMs = now;
+  wifiConnectStartedMs = now;
+
   Serial.print("[WiFi] Connecting to ");
   Serial.print(WIFI_SSID);
   Serial.print(" (state: ");
   Serial.print(wifiStatusText(status));
   Serial.println(")...");
-  WiFi.disconnect(true, false);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  // Avoid force-disconnect loops; try reconnect first, then begin if needed.
+  if (!WiFi.reconnect()) {
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  }
 }
 
 String iso8601UtcNow() {
@@ -109,7 +128,7 @@ String iso8601UtcNow() {
   return String(buffer);
 }
 
-void postReading(float flowLpm, uint64_t totalMl) {
+void postReading(const char* sensorId, float flowLpm, uint64_t totalMl) {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("[HTTP] Skipped: Wi-Fi not connected.");
     return;
@@ -125,7 +144,7 @@ void postReading(float flowLpm, uint64_t totalMl) {
 
   String measuredAt = iso8601UtcNow();
   String body = "{";
-  body += "\"sensor_id\":\"" + String(SENSOR_ID) + "\",";
+  body += "\"sensor_id\":\"" + String(sensorId) + "\",";
   body += "\"flow_lpm\":" + String(flowLpm, 3) + ",";
   body += "\"total_ml\":" + String((unsigned long)totalMl);
 
@@ -154,17 +173,20 @@ void postReading(float flowLpm, uint64_t totalMl) {
 void setup() {
   Serial.begin(115200);
   delay(300);
-  Serial.println("\n[Boot] ESP32 flow sender starting...");
+  Serial.println("\n[Boot] ESP32 dual-flow sender starting...");
   Serial.print("[Boot] API URL: ");
   Serial.println(API_URL);
 
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(SENSOR_PIN, INPUT_PULLUP);
+  pinMode(SENSOR_A_PIN, INPUT_PULLUP);
+  pinMode(SENSOR_B_PIN, INPUT_PULLUP);
 
-  pulseCount = 0;
+  pulseCountA = 0;
+  pulseCountB = 0;
   lastSampleMs = millis();
 
-  attachInterrupt(digitalPinToInterrupt(SENSOR_PIN), pulseCounter, FALLING);
+  attachInterrupt(digitalPinToInterrupt(SENSOR_A_PIN), pulseCounterA, FALLING);
+  attachInterrupt(digitalPinToInterrupt(SENSOR_B_PIN), pulseCounterB, FALLING);
 
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
@@ -186,27 +208,41 @@ void loop() {
     lastSampleMs = now;
 
     noInterrupts();
-    uint32_t pulses = pulseCount;
-    pulseCount = 0;
+    uint32_t pulsesA = pulseCountA;
+    uint32_t pulsesB = pulseCountB;
+    pulseCountA = 0;
+    pulseCountB = 0;
     interrupts();
 
-    float frequency = (pulses * 1000.0f) / elapsedMs;
-    flowRateLMin = frequency / CALIBRATION_FACTOR;
+    float frequencyA = (pulsesA * 1000.0f) / elapsedMs;
+    float frequencyB = (pulsesB * 1000.0f) / elapsedMs;
+    flowRateA_LMin = frequencyA / CALIBRATION_FACTOR;
+    flowRateB_LMin = frequencyB / CALIBRATION_FACTOR;
+    combinedFlowRateLMin = flowRateA_LMin + flowRateB_LMin;
 
-    float milliLitresThisInterval = (flowRateLMin / 60.0f) * 1000.0f * (elapsedMs / 1000.0f);
-    flowMilliLitres = (uint32_t)(milliLitresThisInterval + 0.5f);
-    totalMilliLitres += flowMilliLitres;
+    float milliLitresA = (flowRateA_LMin / 60.0f) * 1000.0f * (elapsedMs / 1000.0f);
+    float milliLitresB = (flowRateB_LMin / 60.0f) * 1000.0f * (elapsedMs / 1000.0f);
+    flowA_MilliLitres = (uint32_t)(milliLitresA + 0.5f);
+    flowB_MilliLitres = (uint32_t)(milliLitresB + 0.5f);
+    totalA_MilliLitres += flowA_MilliLitres;
+    totalB_MilliLitres += flowB_MilliLitres;
+    totalCombinedMilliLitres = totalA_MilliLitres + totalB_MilliLitres;
 
-    digitalWrite(LED_BUILTIN, pulses > 0 ? HIGH : LOW);
+    digitalWrite(LED_BUILTIN, (pulsesA > 0 || pulsesB > 0) ? HIGH : LOW);
 
-    Serial.print("Flow rate: ");
-    Serial.print(flowRateLMin, 2);
-    Serial.print(" L/min\tOutput Liquid Quantity: ");
-    Serial.print(totalMilliLitres);
+    Serial.print("P27: ");
+    Serial.print(flowRateA_LMin, 2);
+    Serial.print(" L/min, P26: ");
+    Serial.print(flowRateB_LMin, 2);
+    Serial.print(" L/min, Combined: ");
+    Serial.print(combinedFlowRateLMin, 2);
+    Serial.print(" L/min, Total: ");
+    Serial.print(totalCombinedMilliLitres);
     Serial.print(" mL / ");
-    Serial.print(totalMilliLitres / 1000.0f, 3);
+    Serial.print(totalCombinedMilliLitres / 1000.0f, 3);
     Serial.println(" L");
 
-    postReading(flowRateLMin, totalMilliLitres);
+    postReading(SENSOR_A_ID, flowRateA_LMin, totalA_MilliLitres);
+    postReading(SENSOR_B_ID, flowRateB_LMin, totalB_MilliLitres);
   }
 }

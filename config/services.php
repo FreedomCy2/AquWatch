@@ -38,6 +38,14 @@ return [
     'sensors' => [
         'ingest_token' => env('SENSOR_INGEST_TOKEN'),
         'accept_legacy_token' => env('SENSOR_ACCEPT_LEGACY_TOKEN', true),
+        'reading_retention_days' => (int) env('SENSOR_READING_RETENTION_DAYS', 30),
+    ],
+
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'openai'),
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
     ],
 
 ];

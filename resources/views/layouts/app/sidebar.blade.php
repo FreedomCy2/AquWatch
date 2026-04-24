@@ -15,6 +15,21 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                    @if (auth()->user()?->isPro())
+                        <flux:sidebar.item icon="sparkles" :href="route('contents.ai-insights')" :current="request()->routeIs('contents.ai-insights')" wire:navigate>
+                            {{ __('AI Insights') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="chat-bubble-left-right" :href="route('contents.ai-chat')" :current="request()->routeIs('contents.ai-chat')" wire:navigate>
+                            {{ __('AI Chat') }}
+                        </flux:sidebar.item>
+                    @else
+                        <flux:sidebar.item icon="crown" :href="route('plans')" :current="request()->routeIs('plans')" wire:navigate>
+                            {{ __('Upgrade to Pro') }}
+                        </flux:sidebar.item>
+                    @endif
+                    <flux:sidebar.item icon="bell" :href="route('contents.notifications')" :current="request()->routeIs('contents.notifications')" wire:navigate>
+                        {{ __('Notifications') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

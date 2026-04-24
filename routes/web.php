@@ -6,6 +6,10 @@ use App\Http\Controllers\FloodDisplayController;
 use App\Http\Controllers\GraphDisplayController;
 use App\Http\Controllers\RainDisplayController;
 use App\Http\Controllers\RainGraphDisplayController;
+use App\Http\Controllers\AiInsightController;
+use App\Http\Controllers\AiChatController;
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\AlertNotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 
@@ -13,10 +17,11 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('/plans', 'plans')->name('plans');
+Route::get('/plans', [PlanController::class, 'index'])->name('plans');
 
 Route::middleware(['auth'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
+        Route::post('/plans/switch', [PlanController::class, 'switchPlan'])->name('plans.switch');
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.legacy.edit');
@@ -29,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
                 Route::redirect('/flood-display', '/contents/flood-display');
                 Route::redirect('/flow-display', '/contents/flow-display');
                 Route::redirect('/graph-display', '/contents/graph-display');
+                Route::redirect('/notifications', '/contents/notifications');
 
 
 Route::get('contents/rain-display', [RainDisplayController::class, 'index'])
@@ -69,4 +75,22 @@ Route::get('contents/graph-display', [GraphDisplayController::class, 'index'])
 
 Route::get('contents/graph-display/data', [GraphDisplayController::class, 'data'])
         ->name('contents.graph-display.data');
+
+Route::get('contents/ai-insights', [AiInsightController::class, 'index'])
+        ->name('contents.ai-insights');
+
+Route::get('contents/ai-chat', [AiChatController::class, 'index'])
+        ->name('contents.ai-chat');
+
+Route::post('contents/ai-chat/ask', [AiChatController::class, 'ask'])
+        ->name('contents.ai-chat.ask');
+
+Route::post('contents/ai-chat/clear', [AiChatController::class, 'clear'])
+        ->name('contents.ai-chat.clear');
+
+Route::get('contents/notifications', [AlertNotificationController::class, 'index'])
+        ->name('contents.notifications');
+
+Route::get('contents/notifications/history', [AlertNotificationController::class, 'history'])
+        ->name('contents.notifications.history');
 });

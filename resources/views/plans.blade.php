@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AquWatch Plans</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -57,10 +57,22 @@
                 Flood Monitoring Plans
             </span>
             <h1 class="mt-4 text-4xl md:text-5xl font-black text-blue-900">Choose the plan that fits your operations</h1>
-            <p class="mt-3 text-blue-900/80 max-w-2xl mx-auto">Dummy pricing page for now. Core flood safety stays simple, while advanced features can be unlocked as you scale.</p>
+            <p class="mt-3 text-blue-900/80 max-w-2xl mx-auto">Core flood safety stays simple, while advanced Pro analytics and AI insights can be unlocked as you scale.</p>
         </section>
 
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        @if (session('success'))
+            <section class="mb-6 rounded-xl border border-emerald-300 bg-emerald-100/80 px-4 py-3 text-emerald-900">
+                {{ session('success') }}
+            </section>
+        @endif
+
+        @if (session('error'))
+            <section class="mb-6 rounded-xl border border-rose-300 bg-rose-100/80 px-4 py-3 text-rose-900">
+                {{ session('error') }}
+            </section>
+        @endif
+
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <article class="plan-card bg-white/75 backdrop-blur-sm rounded-2xl border border-white p-6 shadow-lg">
                 <div class="flex items-center justify-between">
                     <h2 class="text-2xl font-bold text-blue-900">Free</h2>
@@ -73,7 +85,25 @@
                     <li><i class="fas fa-check text-emerald-600 mr-2"></i>In-app alerts</li>
                     <li><i class="fas fa-check text-emerald-600 mr-2"></i>7-day history</li>
                 </ul>
-                <button type="button" class="mt-6 w-full py-2.5 rounded-xl bg-white border border-cyan-200 text-cyan-800 font-semibold cursor-default">Current Base Plan</button>
+                @auth
+                    @if ($currentPlan === 'free')
+                        <button type="button" class="mt-6 w-full py-2.5 rounded-xl bg-white border border-cyan-200 text-cyan-800 font-semibold cursor-default">
+                            Current Plan
+                        </button>
+                    @else
+                        <form method="POST" action="{{ route('plans.switch') }}" class="mt-6">
+                            @csrf
+                            <input type="hidden" name="plan_tier" value="free">
+                            <button type="submit" class="w-full py-2.5 rounded-xl bg-white border border-cyan-300 text-cyan-800 font-semibold hover:bg-cyan-50 transition">
+                                Switch to Free
+                            </button>
+                        </form>
+                    @endif
+                @else
+                    <button type="button" class="mt-6 w-full py-2.5 rounded-xl bg-white border border-cyan-200 text-cyan-800 font-semibold cursor-default">
+                        Available
+                    </button>
+                @endauth
             </article>
 
             <article class="plan-card bg-white/85 backdrop-blur-sm rounded-2xl border-2 border-cyan-400 p-6 shadow-xl relative">
@@ -83,53 +113,44 @@
                     <span class="text-xs px-2 py-1 rounded-full bg-cyan-100 text-cyan-700">Recommended</span>
                 </div>
                 <p class="mt-1 text-sm text-blue-900/70">For power users who need deeper insights.</p>
-                <p class="mt-5 text-3xl font-extrabold text-blue-900">$9<span class="text-sm font-semibold text-blue-900/60">/month</span></p>
+                <p class="mt-5 text-3xl font-extrabold text-blue-900">
+                    $7.99<span class="text-sm font-semibold text-blue-900/60"> first month</span>
+                    <span class="ml-2 text-base font-semibold line-through text-blue-900/55">$12.99</span>
+                </p>
+                <p class="mt-1 text-sm text-blue-900/75">Renews at $12.99/month after first month.</p>
                 <ul class="mt-5 space-y-2 text-sm text-blue-900/85">
                     <li><i class="fas fa-check text-emerald-600 mr-2"></i>Everything in Free</li>
                     <li><i class="fas fa-check text-emerald-600 mr-2"></i>AI assistant insights</li>
                     <li><i class="fas fa-check text-emerald-600 mr-2"></i>90-day history and exports</li>
                     <li><i class="fas fa-check text-emerald-600 mr-2"></i>SMS escalation alerts</li>
                 </ul>
-                <button type="button" class="mt-6 w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold" onclick="showDummyToast('Pro checkout is dummy for now.')">Upgrade to Pro</button>
+                @auth
+                    @if ($currentPlan === 'pro')
+                        <a href="{{ route('contents.ai-insights') }}" class="mt-6 block w-full py-2.5 rounded-xl bg-emerald-600 text-white font-semibold text-center hover:bg-emerald-700 transition">
+                            Open AI Insights
+                        </a>
+                    @else
+                        <form method="POST" action="{{ route('plans.switch') }}" class="mt-6">
+                            @csrf
+                            <input type="hidden" name="plan_tier" value="pro">
+                            <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold hover:from-cyan-700 hover:to-blue-700 transition">
+                                Upgrade to Pro
+                            </button>
+                        </form>
+                    @endif
+                @else
+                    <a href="{{ route('login') }}" class="mt-6 block w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-semibold text-center hover:from-cyan-700 hover:to-blue-700 transition">
+                        Login to Upgrade
+                    </a>
+                @endauth
             </article>
 
-            <article class="plan-card bg-white/75 backdrop-blur-sm rounded-2xl border border-white p-6 shadow-lg">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-2xl font-bold text-blue-900">Business</h2>
-                    <span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">Multi-site</span>
-                </div>
-                <p class="mt-1 text-sm text-blue-900/70">For teams and organizations with many locations.</p>
-                <p class="mt-5 text-3xl font-extrabold text-blue-900">$39<span class="text-sm font-semibold text-blue-900/60">/month</span></p>
-                <ul class="mt-5 space-y-2 text-sm text-blue-900/85">
-                    <li><i class="fas fa-check text-emerald-600 mr-2"></i>Everything in Pro</li>
-                    <li><i class="fas fa-check text-emerald-600 mr-2"></i>Multi-site dashboard</li>
-                    <li><i class="fas fa-check text-emerald-600 mr-2"></i>Role-based access</li>
-                    <li><i class="fas fa-check text-emerald-600 mr-2"></i>API access and audit logs</li>
-                </ul>
-                <button type="button" class="mt-6 w-full py-2.5 rounded-xl bg-white border border-cyan-200 text-cyan-800 font-semibold" onclick="showDummyToast('Business sales flow is dummy for now.')">Contact Sales</button>
-            </article>
         </section>
 
         <section class="mt-8 bg-white/60 border border-white rounded-2xl p-5 text-sm text-blue-900/80">
-            <p><strong>Note:</strong> This is a dummy plans page for UI/demo only. Subscription billing is not wired yet.</p>
+            <p><strong>Note:</strong> Pro activation is now real inside the app account state. External payment billing is still not wired.</p>
         </section>
     </main>
 
-    <div id="dummy-toast" class="hidden fixed bottom-5 right-5 bg-blue-900 text-white px-4 py-3 rounded-lg shadow-xl text-sm"></div>
-
-    <script>
-        function showDummyToast(message) {
-            const toast = document.getElementById('dummy-toast');
-            if (!toast) {
-                return;
-            }
-
-            toast.textContent = message;
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 1800);
-        }
-    </script>
 </body>
 </html>
