@@ -11,7 +11,13 @@
         ->take(2)
         ->values();
 
-    $dashboardFlowLpm = round((float) $dashboardLatestFlowPerSensor->sum(function ($reading): float {
+    $dashboardRecentFlowPerSensor = $dashboardLatestFlowPerSensor
+        ->filter(function ($reading): bool {
+            return $reading->created_at?->greaterThanOrEqualTo(now()->subMinutes(2)) ?? false;
+        })
+        ->values();
+
+    $dashboardFlowLpm = round((float) $dashboardRecentFlowPerSensor->sum(function ($reading): float {
         return (float) $reading->flow_lpm;
     }), 3);
     $dashboardFlowBarPercent = min(100, max(0, ($dashboardFlowLpm / 20) * 100));
@@ -29,11 +35,7 @@
     $dashboardDailyMl = max(0, (int) ($todayLast?->total_ml ?? 0) - (int) ($todayFirst?->total_ml ?? 0));
     $dashboardDailyL = $dashboardDailyMl / 1000;
 
-    $dashboardActiveFlowSensors = $dashboardLatestFlowPerSensor
-        ->filter(function ($reading): bool {
-            return $reading->created_at?->greaterThanOrEqualTo(now()->subSeconds(15)) ?? false;
-        })
-        ->count();
+    $dashboardActiveFlowSensors = $dashboardRecentFlowPerSensor->count();
 
     $dashboardHasRecentFlow = $dashboardActiveFlowSensors > 0;
 
@@ -283,6 +285,15 @@
         .chart-container:hover {
             transform: scale(1.01);
         }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 
@@ -299,7 +310,7 @@
     </div>
 
     <!-- Header -->
-<header class="relative z-20 flex flex-col md:flex-row justify-between md:items-center w-full max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-5 gap-3">        <div class="flex items-center gap-2 md:gap-3 group cursor-pointer transition-all duration-300">
+<header class="relative z-20 flex flex-col md:flex-row justify-between md:items-start w-full max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-5 gap-4">        <div class="flex items-center gap-2 md:gap-3 group cursor-pointer transition-all duration-300">
 <img src="{{ asset('images/logo.png') }}" 
      alt="AquWatch Logo"
      class="h-10 w-auto drop-shadow-md">
@@ -309,54 +320,65 @@
             </span>
         </div>
 
-        <div class="flex flex-wrap items-center justify-end gap-2 md:gap-4 w-full md:w-auto">
-            <div class="hidden md:flex items-center gap-2 bg-white/40 backdrop-blur-sm px-4 py-2 rounded-full text-blue-800 text-sm">
-                <i class="fas fa-clock"></i>
-                <span id="live-time">--:-- --</span>
+        <div class="w-full md:w-auto flex flex-col md:items-end gap-3">
+            <div class="w-full md:w-auto overflow-x-auto no-scrollbar">
+                <div class="flex items-center md:justify-end gap-2 md:gap-3 min-w-max">
+                    <div class="hidden md:flex items-center gap-2 bg-white/40 backdrop-blur-sm px-4 py-2 rounded-full text-blue-800 text-sm whitespace-nowrap">
+                        <i class="fas fa-clock"></i>
+                        <span id="live-time">--:-- --</span>
+                    </div>
+
+                    <a href="{{ route('contents.notifications') }}"
+                       class="relative flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap"
+                       title="Notifications">
+                        <i class="fas fa-bell text-amber-600"></i>
+                        <span class="hidden sm:inline">Notifications</span>
+                        @if ($dashboardRecentAlertCount > 0)
+                            <span class="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                                {{ $dashboardRecentAlertCount }}
+                            </span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('contents.announcements') }}"
+                       class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap"
+                       title="Announcements">
+                        <i class="fas fa-bullhorn text-orange-500"></i>
+                        <span class="hidden sm:inline">Announcements</span>
+                    </a>
+
+                    @if (Auth::user()->isPro())
+                        <a href="{{ route('contents.ai-chat') }}"
+                           class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap">
+                            <i class="fas fa-comments text-cyan-600"></i>
+                            <span class="hidden sm:inline">AI Chat</span>
+                        </a>
+                        <a href="{{ route('contents.ai-insights') }}"
+                           class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap">
+                            <i class="fas fa-robot text-cyan-600"></i>
+                            <span class="hidden sm:inline">AI Insights</span>
+                        </a>
+                    @else
+                        <a href="{{ route('plans') }}"
+                           class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap">
+                            <i class="fas fa-lock text-amber-600"></i>
+                            <span class="hidden sm:inline">Unlock AI</span>
+                        </a>
+                    @endif
+
+                    <a href="{{ route('plans') }}"
+                       class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap">
+                        <i class="fas fa-crown text-amber-500"></i>
+                        <span class="hidden sm:inline">{{ Auth::user()->isPro() ? 'Pro Active' : 'Upgrade' }}</span>
+                    </a>
+                </div>
             </div>
 
-            <a href="{{ route('contents.notifications') }}"
-               class="relative flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition"
-               title="Notifications">
-                <i class="fas fa-bell text-amber-600"></i>
-                <span class="hidden sm:inline">Notifications</span>
-                @if ($dashboardRecentAlertCount > 0)
-                    <span class="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
-                        {{ $dashboardRecentAlertCount }}
-                    </span>
-                @endif
-            </a>
-
-            @if (Auth::user()->isPro())
-                <a href="{{ route('contents.ai-chat') }}"
-                   class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
-                    <i class="fas fa-comments text-cyan-600"></i>
-                    <span class="hidden sm:inline">AI Chat</span>
-                </a>
-                <a href="{{ route('contents.ai-insights') }}"
-                   class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
-                    <i class="fas fa-robot text-cyan-600"></i>
-                    <span class="hidden sm:inline">AI Insights</span>
-                </a>
-            @else
-                <a href="{{ route('plans') }}"
-                   class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
-                    <i class="fas fa-lock text-amber-600"></i>
-                    <span class="hidden sm:inline">Unlock AI</span>
-                </a>
-            @endif
-
-            <a href="{{ route('plans') }}"
-               class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition">
-                <i class="fas fa-crown text-amber-500"></i>
-                <span class="hidden sm:inline">{{ Auth::user()->isPro() ? 'Pro Active' : 'Upgrade' }}</span>
-            </a>
-
             <!-- Profile Dropdown -->
-            <div class="relative">
+            <div class="relative w-full md:w-auto flex md:justify-end">
                 <button id="profileButton"
                         type="button"
-                        class="flex items-center gap-3 bg-white/80 hover:bg-white px-3 py-2 rounded-2xl shadow border border-white/70 transition">
+                        class="ml-auto flex items-center gap-3 bg-white/80 hover:bg-white px-3 py-2 rounded-2xl shadow border border-white/70 transition">
 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-300 to-slate-500 flex items-center justify-center text-white font-bold overflow-hidden">
     @if(Auth::user()->profile && Auth::user()->profile->photo)
         <img src="{{ asset('storage/' . Auth::user()->profile->photo) }}"
@@ -427,13 +449,6 @@
                             </span>
                         </h2>
                         <p class="text-blue-800/80">Real-time water intelligence at your fingertips</p>
-                    </div>
-
-                    <div class="flex gap-6">
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-teal-700 stat-value" id="active-sensors">{{ $dashboardActiveSensors }}</div>
-                            <div class="text-xs text-blue-700">Active Sensors</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -537,6 +552,31 @@
 
     </main>
 
+    <nav class="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/90 backdrop-blur-md border-t border-white/80 shadow-[0_-6px_18px_rgba(20,80,120,0.12)]">
+        <div class="grid grid-cols-5 gap-1 px-2 py-2 text-[11px] font-semibold text-blue-900">
+            <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 bg-sky-100/80">
+                <i class="fas fa-house text-sm"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ route('contents.rain-display') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
+                <i class="fas fa-cloud-rain text-sm"></i>
+                <span>Rain</span>
+            </a>
+            <a href="{{ route('contents.flood-display') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
+                <i class="fas fa-water text-sm"></i>
+                <span>Flood</span>
+            </a>
+            <a href="{{ route('contents.flow-display') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
+                <i class="fas fa-tint text-sm"></i>
+                <span>Flow</span>
+            </a>
+            <a href="{{ route('contents.announcements') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
+                <i class="fas fa-bullhorn text-sm"></i>
+                <span>News</span>
+            </a>
+        </div>
+    </nav>
+
     <!-- Footer -->
     <footer class="relative z-10 text-center text-blue-800/80 py-5 text-sm backdrop-blur-sm bg-white/20 mt-8 border-t border-white/40">
         <div class="flex justify-center gap-6 mb-2">
@@ -621,22 +661,7 @@
         let floodStatusText = @json($dashboardFloodCardState);
         let floodRiseSec = Number(@json($dashboardFloodRiseSec));
         let flowActiveSensors = Number(@json($dashboardActiveFlowSensors));
-        let rainSensorIsRecent = Boolean(@json($dashboardHasRecentRain));
-        let floodSensorIsRecent = Boolean(@json($dashboardHasRecentFlood));
         let dailyVolumeL = Number(@json(round($dashboardDailyL, 2)));
-
-        function refreshActiveSensors() {
-            const activeSensorsEl = document.getElementById('active-sensors');
-            if (!activeSensorsEl) {
-                return;
-            }
-
-            const activeCount = flowActiveSensors
-                + (rainSensorIsRecent ? 1 : 0)
-                + (floodSensorIsRecent ? 1 : 0);
-
-            activeSensorsEl.textContent = String(activeCount);
-        }
 
         const chartCanvas = document.getElementById('waterChart');
         let chart = null;
@@ -731,7 +756,6 @@
                     }
                 }
 
-                refreshActiveSensors();
             } catch {
                 // Keep last known values on temporary request failures.
             }
@@ -780,17 +804,13 @@
 
                 if (rainStateBadgeEl) {
                     if (latest?.is_recent) {
-                        rainSensorIsRecent = true;
                         rainStateBadgeEl.className = 'bg-cyan-100/80 rounded-full px-3 py-1 text-xs text-cyan-700';
                         rainStateBadgeEl.innerHTML = '<i class="fas fa-chart-simple"></i> Live';
                     } else {
-                        rainSensorIsRecent = false;
                         rainStateBadgeEl.className = 'bg-slate-100/80 rounded-full px-3 py-1 text-xs text-slate-700';
                         rainStateBadgeEl.innerHTML = '<i class="fas fa-chart-simple"></i> No recent data';
                     }
                 }
-
-                refreshActiveSensors();
             } catch {
                 // Keep last known values on temporary request failures.
             }
@@ -844,17 +864,13 @@
 
                 if (floodStateBadgeEl) {
                     if (latest?.is_recent) {
-                        floodSensorIsRecent = true;
                         floodStateBadgeEl.className = 'bg-blue-100/80 rounded-full px-3 py-1 text-xs text-blue-700';
                         floodStateBadgeEl.innerHTML = '<i class="fas fa-chart-line"></i> Live';
                     } else {
-                        floodSensorIsRecent = false;
                         floodStateBadgeEl.className = 'bg-slate-100/80 rounded-full px-3 py-1 text-xs text-slate-700';
                         floodStateBadgeEl.innerHTML = '<i class="fas fa-chart-line"></i> No recent data';
                     }
                 }
-
-                refreshActiveSensors();
             } catch {
                 // Keep last known values on temporary request failures.
             }
@@ -871,7 +887,6 @@
         refreshFlowSummary();
         refreshRainSummary();
         refreshFloodSummary();
-        refreshActiveSensors();
         setInterval(refreshFlowSummary, 5000);
         setInterval(refreshRainSummary, 5000);
         setInterval(refreshFloodSummary, 5000);

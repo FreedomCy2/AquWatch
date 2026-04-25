@@ -38,7 +38,7 @@ class FlowDisplayController extends Controller
     private function buildPayload(): array
     {
         $now = now();
-        $liveCutoff = $now->copy()->subSeconds(15);
+        $liveCutoff = $now->copy()->subMinutes(2);
 
         $latestPerSensor = FlowReading::query()
             ->select(['sensor_id', 'flow_lpm', 'total_ml', 'created_at'])
@@ -48,23 +48,29 @@ class FlowDisplayController extends Controller
             ->take(2)
             ->values()
             ->map(function (FlowReading $reading) use ($liveCutoff): array {
+                $isRecent = optional($reading->created_at)->greaterThanOrEqualTo($liveCutoff) ?? false;
+
                 return [
                     'sensor_id' => (string) $reading->sensor_id,
-                    'flow_lpm' => (float) $reading->flow_lpm,
+                    'flow_lpm' => $isRecent ? (float) $reading->flow_lpm : 0.0,
                     'total_ml' => (int) $reading->total_ml,
                     'measured_at' => optional($reading->created_at)->toIso8601String(),
-                    'is_recent' => optional($reading->created_at)->greaterThanOrEqualTo($liveCutoff) ?? false,
+                    'is_recent' => $isRecent,
                 ];
             })
             ->all();
 
-        $combinedFlow = collect($latestPerSensor)
+        $recentSensors = collect($latestPerSensor)
+            ->filter(fn (array $sensor): bool => (bool) ($sensor['is_recent'] ?? false))
+            ->values();
+
+        $combinedFlow = $recentSensors
             ->sum(fn (array $sensor): float => (float) ($sensor['flow_lpm'] ?? 0));
 
         $combinedTotal = collect($latestPerSensor)
             ->sum(fn (array $sensor): int => (int) ($sensor['total_ml'] ?? 0));
 
-        $lastUpdated = collect($latestPerSensor)
+        $lastUpdated = $recentSensors
             ->pluck('measured_at')
             ->filter()
             ->first();
@@ -75,7 +81,8 @@ class FlowDisplayController extends Controller
                 'flow_lpm' => round((float) $combinedFlow, 3),
                 'total_ml' => (int) $combinedTotal,
                 'measured_at' => $lastUpdated,
-                'is_recent' => collect($latestPerSensor)->contains(fn (array $sensor): bool => (bool) ($sensor['is_recent'] ?? false)),
+                'sensor_count' => $recentSensors->count(),
+                'is_recent' => $recentSensors->isNotEmpty(),
             ],
             'stats' => [
                 'reading_count' => FlowReading::count(),

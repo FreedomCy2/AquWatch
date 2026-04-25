@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,6 +17,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
         'plan_tier',
         'plan_changed_at',
     ];
@@ -49,6 +51,21 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    public function announcements(): HasMany
+    {
+        return $this->hasMany(Announcement::class, 'created_by');
+    }
+
+    public function sentNotifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class, 'sent_by');
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class, 'user_id');
+    }
+
     public function initials(): string
     {
         return (string) collect(explode(' ', (string) $this->name))
@@ -61,5 +78,10 @@ class User extends Authenticatable
     public function isPro(): bool
     {
         return strtolower((string) $this->plan_tier) === 'pro';
+    }
+
+    public function isAdmin(): bool
+    {
+        return strtolower((string) $this->role) === 'admin';
     }
 }

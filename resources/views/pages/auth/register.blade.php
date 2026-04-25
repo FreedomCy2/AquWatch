@@ -277,6 +277,55 @@
                         @enderror
                     </div>
 
+                    <div class="group">
+                        <label class="block text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                            <i class="fas fa-user-shield text-cyan-600 text-xs"></i>
+                            Account Type
+                        </label>
+                        <div class="relative">
+                            <select
+                                id="role"
+                                name="role"
+                                class="input-focus-effect w-full rounded-xl border border-blue-200 bg-white/90 px-4 py-3.5 text-blue-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-200"
+                                required
+                            >
+                                <option value="user" {{ old('role', 'user') === 'user' ? 'selected' : '' }}>User</option>
+                                <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                            </select>
+                        </div>
+                        @error('role')
+                            <p class="mt-2 text-sm text-red-500 flex items-center gap-1">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+                    <div id="admin-code-wrapper" class="group {{ old('role') === 'admin' ? '' : 'hidden' }}">
+                        <label class="block text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                            <i class="fas fa-key text-cyan-600 text-xs"></i>
+                            Admin Code
+                        </label>
+                        <div class="relative">
+                            <input
+                                id="admin_code"
+                                name="admin_code"
+                                type="password"
+                                value="{{ old('admin_code') }}"
+                                autocomplete="off"
+                                placeholder="Enter admin code"
+                                class="input-focus-effect w-full rounded-xl border border-blue-200 bg-white/90 px-4 py-3.5 text-blue-900 placeholder-blue-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-200"
+                            >
+                            <i class="fas fa-key absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-300 text-lg"></i>
+                        </div>
+                        @error('admin_code')
+                            <p class="mt-2 text-sm text-red-500 flex items-center gap-1">
+                                <i class="fas fa-exclamation-circle text-xs"></i>
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
                     <!-- PASSWORD FIELD with strength meter -->
                     <div class="group">
                         <label class="block text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
@@ -435,6 +484,30 @@
                     icon.classList.toggle('fa-eye-slash');
                 }
             });
+        }
+
+        const roleSelect = document.getElementById('role');
+        const adminCodeWrapper = document.getElementById('admin-code-wrapper');
+        const adminCodeInput = document.getElementById('admin_code');
+
+        function syncAdminCodeVisibility() {
+            const isAdmin = roleSelect && roleSelect.value === 'admin';
+
+            if (!adminCodeWrapper || !adminCodeInput) {
+                return;
+            }
+
+            adminCodeWrapper.classList.toggle('hidden', !isAdmin);
+            adminCodeInput.required = Boolean(isAdmin);
+
+            if (!isAdmin) {
+                adminCodeInput.value = '';
+            }
+        }
+
+        if (roleSelect) {
+            roleSelect.addEventListener('change', syncAdminCodeVisibility);
+            syncAdminCodeVisibility();
         }
         
  

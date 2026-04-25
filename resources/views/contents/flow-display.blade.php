@@ -98,10 +98,11 @@
                 </div>
 
                 <div class="glass-card rounded-2xl p-4 shadow-lg">
-                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Combined Flow</p>
+                    <p class="text-xs uppercase tracking-wide text-cyan-900/70">Combined Flow (S1 + S2)</p>
                     <p id="kpi-flow-combined" class="text-3xl font-bold text-cyan-950 mt-1">0.000</p>
                     <p class="text-cyan-900/70 text-sm">L/min</p>
                     <p id="kpi-total-combined" class="text-cyan-900/80 text-sm mt-1">Total: 0 mL</p>
+                    <p id="kpi-sensors-combined" class="text-cyan-900/80 text-sm">Sensors: 0</p>
                     <p id="kpi-time" class="text-cyan-900/80 text-sm">Updated: -</p>
                     <p id="kpi-status-combined" class="text-lg font-bold text-cyan-950 mt-1">Checking...</p>
                 </div>
@@ -154,11 +155,40 @@
         }
 
         function statusFromFlow(flowLpm, isRecent) {
-            const LOW_FLOW_THRESHOLD = 0.2;
+            const NO_FLOW_THRESHOLD = 0.01;
+            const LOW_FLOW_THRESHOLD = 0.25;
             const HIGH_FLOW_THRESHOLD = 3.0;
 
             if (!isRecent) {
                 return { label: 'No recent data', className: 'text-lg font-bold text-slate-700 mt-1' };
+            }
+
+            if (flowLpm <= NO_FLOW_THRESHOLD) {
+                return { label: 'No Water Flow', className: 'text-lg font-bold text-slate-800 mt-1' };
+            }
+
+            if (flowLpm < LOW_FLOW_THRESHOLD) {
+                return { label: 'Low Water Flow', className: 'text-lg font-bold text-amber-700 mt-1' };
+            }
+
+            if (flowLpm <= HIGH_FLOW_THRESHOLD) {
+                return { label: 'Normal Flow', className: 'text-lg font-bold text-emerald-700 mt-1' };
+            }
+
+            return { label: 'Too Much Flow', className: 'text-lg font-bold text-rose-700 mt-1' };
+        }
+
+        function statusFromCombinedFlow(flowLpm, isRecent) {
+            const NO_FLOW_THRESHOLD = 0.01;
+            const LOW_FLOW_THRESHOLD = 0.5;
+            const HIGH_FLOW_THRESHOLD = 6.0;
+
+            if (!isRecent) {
+                return { label: 'No recent data', className: 'text-lg font-bold text-slate-700 mt-1' };
+            }
+
+            if (flowLpm <= NO_FLOW_THRESHOLD) {
+                return { label: 'No Water Flow', className: 'text-lg font-bold text-slate-800 mt-1' };
             }
 
             if (flowLpm < LOW_FLOW_THRESHOLD) {
@@ -192,11 +222,12 @@
 
             document.getElementById('kpi-flow-combined').textContent = flowCombined.toFixed(3);
             document.getElementById('kpi-total-combined').textContent = `Total: ${Number(combined?.total_ml ?? 0).toLocaleString()} mL`;
+            document.getElementById('kpi-sensors-combined').textContent = `Sensors: ${Number(combined?.sensor_count ?? 0)}`;
             document.getElementById('kpi-time').textContent = `Updated: ${formatTime(combined?.measured_at)}`;
 
             const statusA = statusFromFlow(flowA, Boolean(sensorA?.is_recent));
             const statusB = statusFromFlow(flowB, Boolean(sensorB?.is_recent));
-            const statusCombined = statusFromFlow(flowCombined, Boolean(combined?.is_recent));
+            const statusCombined = statusFromCombinedFlow(flowCombined, Boolean(combined?.is_recent));
 
             const statusAElement = document.getElementById('kpi-status-a');
             statusAElement.textContent = statusA.label;
