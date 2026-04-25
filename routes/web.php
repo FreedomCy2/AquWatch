@@ -12,9 +12,22 @@ use App\Http\Controllers\PlanController;
 use App\Http\Controllers\AlertNotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
+use App\Models\Sensor;
 
 Route::get('/', function () {
-    return view('welcome');
+        $totalSensors = Sensor::query()->where('is_active', true)->count();
+        $onlineSensors = Sensor::query()
+                ->where('is_active', true)
+                ->where('last_seen_at', '>=', now()->subMinutes(2))
+                ->count();
+
+        $allSensorsOnline = $totalSensors > 0 && $onlineSensors === $totalSensors;
+
+        return view('welcome', [
+                'totalSensors' => $totalSensors,
+                'onlineSensors' => $onlineSensors,
+                'allSensorsOnline' => $allSensorsOnline,
+        ]);
 })->name('home');
 
 Route::get('/plans', [PlanController::class, 'index'])->name('plans');

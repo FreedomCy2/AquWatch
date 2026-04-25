@@ -36,7 +36,6 @@ class SettingsController extends Controller
             'preferred_language' => (string) ($profile->preferred_language ?? 'en'),
             'in_app_alerts' => (bool) ($preferences['in_app_alerts'] ?? true),
             'sms_alerts' => (bool) ($preferences['sms_alerts'] ?? false),
-            'email_alerts' => (bool) ($preferences['email_alerts'] ?? true),
             'flood_trigger' => (string) ($preferences['flood_trigger'] ?? 'LEVEL 1 DETECTED'),
             'rain_trigger' => (string) ($preferences['rain_trigger'] ?? 'heavy_rain'),
             'flow_anomaly_percent' => (int) ($preferences['flow_anomaly_percent'] ?? 30),
@@ -61,7 +60,6 @@ class SettingsController extends Controller
             'preferred_language' => ['required', Rule::in(self::LANGUAGES)],
             'in_app_alerts' => ['nullable', 'boolean'],
             'sms_alerts' => ['nullable', 'boolean'],
-            'email_alerts' => ['nullable', 'boolean'],
             'flood_trigger' => ['required', Rule::in(self::FLOOD_TRIGGERS)],
             'rain_trigger' => ['required', Rule::in(self::RAIN_TRIGGERS)],
             'flow_anomaly_percent' => ['required', 'integer', 'min:5', 'max:200'],
@@ -83,7 +81,6 @@ class SettingsController extends Controller
         $profile->preferences = [
             'in_app_alerts' => (bool) ($data['in_app_alerts'] ?? false),
             'sms_alerts' => (bool) ($data['sms_alerts'] ?? false),
-            'email_alerts' => (bool) ($data['email_alerts'] ?? false),
             'flood_trigger' => $data['flood_trigger'],
             'rain_trigger' => $data['rain_trigger'],
             'flow_anomaly_percent' => (int) $data['flow_anomaly_percent'],

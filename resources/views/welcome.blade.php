@@ -228,12 +228,15 @@
                 </p>
                 
                 <!-- Live indicator badge (interactive) -->
-                <div class="inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm rounded-full px-4 py-1.5 mb-8 shadow-sm border border-cyan-200">
+                <div class="inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm rounded-full px-4 py-1.5 mb-8 shadow-sm border {{ $allSensorsOnline ? 'border-cyan-200' : 'border-amber-300' }}">
                     <span class="relative flex h-3 w-3">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $allSensorsOnline ? 'bg-green-400' : 'bg-amber-400' }} opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 {{ $allSensorsOnline ? 'bg-green-500' : 'bg-amber-500' }}"></span>
                     </span>
-                    <span class="text-xs font-semibold text-cyan-800 tracking-wide">LIVE MONITORING ACTIVE</span>
+                    <span class="text-xs font-semibold {{ $allSensorsOnline ? 'text-cyan-800' : 'text-amber-700' }} tracking-wide">
+                        {{ $allSensorsOnline ? 'LIVE MONITORING ACTIVE' : 'MONITORING NOT FULLY ACTIVE' }}
+                        <span class="ml-1">({{ $onlineSensors }}/{{ $totalSensors }} sensors)</span>
+                    </span>
                     <i class="fas fa-waveform text-cyan-600 ml-1"></i>
                 </div>
                 
@@ -275,60 +278,14 @@
                 @endauth
             </div>
             
-            <!-- Interactive feature cards - only visible for extra engagement -->
-            <div class="grid md:grid-cols-3 gap-6 mt-12">
-                <div class="card-hover bg-white/40 backdrop-blur-sm rounded-2xl p-5 text-center border border-white/50 transition-all cursor-pointer" onclick="showFeatureAlert('Real-time Monitoring')">
-                    <div class="w-14 h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                        <i class="fas fa-chart-line text-white text-2xl"></i>
-                    </div>
-                    <h3 class="font-bold text-blue-900 text-lg">Live Metrics</h3>
-                    <p class="text-blue-800/80 text-sm mt-1">pH, turbidity & flow in real-time</p>
-                    <span class="text-xs text-cyan-700 mt-2 inline-block opacity-70 group-hover:opacity-100"><i class="fas fa-mouse-pointer"></i> click me</span>
-                </div>
-                <div class="card-hover bg-white/40 backdrop-blur-sm rounded-2xl p-5 text-center border border-white/50 transition-all cursor-pointer" onclick="showFeatureAlert('Smart Alerts')">
-                    <div class="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                        <i class="fas fa-bell text-white text-2xl"></i>
-                    </div>
-                    <h3 class="font-bold text-blue-900 text-lg">Instant Alerts</h3>
-                    <p class="text-blue-800/80 text-sm mt-1">Get notified on anomalies</p>
-                    <span class="text-xs text-cyan-700 mt-2 inline-block opacity-70"><i class="fas fa-mouse-pointer"></i> click me</span>
-                </div>
-                <div class="card-hover bg-white/40 backdrop-blur-sm rounded-2xl p-5 text-center border border-white/50 transition-all cursor-pointer" onclick="showFeatureAlert('Eco Insights')">
-                    <div class="w-14 h-14 bg-gradient-to-br from-sky-400 to-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                        <i class="fas fa-leaf text-white text-2xl"></i>
-                    </div>
-                    <h3 class="font-bold text-blue-900 text-lg">Sustainability</h3>
-                    <p class="text-blue-800/80 text-sm mt-1">Reduce waste, save water</p>
-                    <span class="text-xs text-cyan-700 mt-2 inline-block opacity-70"><i class="fas fa-mouse-pointer"></i> click me</span>
-                </div>
-            </div>
-            
-            <!-- interactive ocean stats (floating stats card) -->
-            <div class="mt-12 flex justify-center">
-                <div class="float-stat bg-white/30 backdrop-blur-md rounded-2xl px-6 py-3 inline-flex gap-6 md:gap-10 border border-white/60 shadow-lg flex-wrap justify-center">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-droplet text-cyan-700 text-xl"></i>
-                        <span class="text-blue-900 font-semibold"><span id="live-water-quality" class="text-teal-700">98.4%</span> purity index</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-users text-blue-700 text-xl"></i>
-                        <span class="text-blue-900 font-semibold"><span id="active-users-counter">1,284</span> active monitors</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-chart-simple text-cyan-800 text-xl"></i>
-                        <span class="text-blue-900 font-semibold"><span id="saved-liters">2.3M</span> L saved</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </main>
     
     <!-- Dynamic Footer with ripple effect -->
     <footer class="relative z-10 text-center text-blue-900/80 py-6 text-sm backdrop-blur-sm bg-white/20 mt-12 border-t border-white/40">
         <div class="flex justify-center gap-6 mb-2">
-            <a href="#" class="hover:text-cyan-800 transition-colors duration-200"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="hover:text-cyan-800 transition-colors duration-200"><i class="fab fa-linkedin"></i></a>
-            <a href="#" class="hover:text-cyan-800 transition-colors duration-200"><i class="fab fa-github"></i></a>
+            <a href="https://x.com/AquWatch" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-800 transition-colors duration-200"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/aquwatch/" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-800 transition-colors duration-200"><i class="fab fa-instagram"></i></a>
         </div>
         <p>© 2025 AquWatch — Intelligent Ocean Conservation · <span class="inline-flex items-center"><i class="fas fa-heart text-rose-400 text-xs mx-1"></i> protect our waves</span></p>
     </footer>
@@ -358,38 +315,8 @@
         setInterval(createBubble, 380);
         for (let i = 0; i < 12; i++) setTimeout(createBubble, i * 200);
         
-        // Interactive live stats random updater (to simulate real-time)
-        let qualityIndex = 98.4;
-        let activeUsers = 1284;
-        let savedLitersVal = 2.3;
-        
-        function updateLiveStats() {
-            // Simulate small fluctuations for interactivity
-            qualityIndex = +(qualityIndex + (Math.random() - 0.5) * 0.3).toFixed(1);
-            if (qualityIndex > 99.5) qualityIndex = 99.2;
-            if (qualityIndex < 96.0) qualityIndex = 96.8;
-            
-            const qualityEl = document.getElementById('live-water-quality');
-            if (qualityEl) qualityEl.innerText = qualityIndex + '%';
-            
-            // active users gently increase
-            activeUsers += Math.floor(Math.random() * 3) - 1;
-            if (activeUsers < 1100) activeUsers = 1120;
-            if (activeUsers > 1450) activeUsers = 1430;
-            const userEl = document.getElementById('active-users-counter');
-            if (userEl) userEl.innerText = activeUsers.toLocaleString();
-            
-            // saved liters increment randomly
-            savedLitersVal += (Math.random() * 0.08);
-            if (savedLitersVal > 2.9) savedLitersVal = 2.4;
-            const litersEl = document.getElementById('saved-liters');
-            if (litersEl) litersEl.innerText = savedLitersVal.toFixed(1) + 'M';
-        }
-        
-        setInterval(updateLiveStats, 3800);
-        
         // Add ripple effect to all buttons with class .ripple-effect dynamically
-        document.querySelectorAll('.ripple-effect, .glow-button, .card-hover').forEach(btn => {
+        document.querySelectorAll('.ripple-effect, .glow-button').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 const rippleDiv = document.createElement('span');
                 const rect = this.getBoundingClientRect();
@@ -416,19 +343,6 @@
                 setTimeout(() => rippleDiv.remove(), 800);
             });
         });
-        
-        // Feature alert interactive
-        window.showFeatureAlert = (feature) => {
-            // Create a toast notification
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-800/90 backdrop-blur-lg text-white px-6 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-3 animate-bounce transition-all duration-500';
-            toast.innerHTML = `<i class="fas fa-info-circle text-cyan-200 text-xl"></i><span class="font-medium">✨ ${feature} feature — dive into smart water monitoring! ✨</span><i class="fas fa-water text-cyan-200"></i>`;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 2800);
-        };
         
         // Add floating effect to logo on hover + interactive card stat simulation
         const logoImg = document.querySelector('img[alt="AquWatch Logo"]');
@@ -467,15 +381,7 @@
             // Already dynamic year in place, no action needed but ensure copyright is current
         }
         
-        // add interactive tooltip to stats
-        const statCards = document.querySelectorAll('.float-stat > div');
-        statCards.forEach(stat => {
-            stat.classList.add('cursor-help');
-            stat.setAttribute('title', 'Live ocean data simulation');
-        });
-        
-        // live water quality mini interactive
-        console.log('🌊 AquWatch interactive ocean theme active — realtime bubbles & stats');
+        console.log('AquWatch interactive ocean theme active');
     </script>
     
     <!-- Additional inline style for custom animation wiggle -->

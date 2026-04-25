@@ -121,9 +121,8 @@
 
     <footer class="mt-auto relative z-10 text-center text-blue-800/80 py-5 text-sm backdrop-blur-sm bg-white/20 border-t border-white/40">
         <div class="flex justify-center gap-6 mb-2">
-            <a href="#" class="hover:text-cyan-800 transition"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="hover:text-cyan-800 transition"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#" class="hover:text-cyan-800 transition"><i class="fab fa-github"></i></a>
+            <a href="https://x.com/AquWatch" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-800 transition"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/aquwatch/" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-800 transition"><i class="fab fa-instagram"></i></a>
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>

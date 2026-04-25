@@ -83,7 +83,7 @@
                 @csrf
 
                 <h2 class="text-lg font-bold text-blue-900 mb-3">{{ __('ui.notification_channels') }}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-7">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-7">
                     <label class="flex items-center gap-3 bg-sky-50 rounded-xl px-4 py-3">
                         <input type="hidden" name="in_app_alerts" value="0">
                         <input type="checkbox" name="in_app_alerts" value="1" {{ $settings['in_app_alerts'] ? 'checked' : '' }}>
@@ -93,11 +93,6 @@
                         <input type="hidden" name="sms_alerts" value="0">
                         <input type="checkbox" name="sms_alerts" value="1" {{ $settings['sms_alerts'] ? 'checked' : '' }}>
                         <span class="text-blue-900">{{ __('ui.sms_alerts') }}</span>
-                    </label>
-                    <label class="flex items-center gap-3 bg-sky-50 rounded-xl px-4 py-3">
-                        <input type="hidden" name="email_alerts" value="0">
-                        <input type="checkbox" name="email_alerts" value="1" {{ $settings['email_alerts'] ? 'checked' : '' }}>
-                        <span class="text-blue-900">{{ __('ui.email_alerts') }}</span>
                     </label>
                 </div>
 

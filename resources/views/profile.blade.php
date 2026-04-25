@@ -70,7 +70,7 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
             <div>
                 <h1 class="text-3xl md:text-4xl font-extrabold text-blue-900">My Profile</h1>
-                <p class="text-blue-800/80 mt-1">View your account details here.</p>
+                <p class="text-blue-800/80 mt-1">View your personal information.</p>
             </div>
 
             <div class="flex flex-wrap gap-3 w-full md:w-auto">
@@ -148,40 +148,13 @@
                     </div>
 
                     <div class="bg-sky-50 rounded-xl px-4 py-3">
-                        <p class="text-xs text-blue-600 font-semibold">Role</p>
-                        <p class="text-blue-900">{{ $profile->role ? ucfirst($profile->role) : 'Not set' }}</p>
-                    </div>
-
-                    <div class="bg-sky-50 rounded-xl px-4 py-3">
                         <p class="text-xs text-blue-600 font-semibold">Preferred Language</p>
                         <p class="text-blue-900">{{ $profile->preferred_language === 'ms' ? 'Bahasa Melayu' : ($profile->preferred_language === 'en' ? 'English' : 'Not set') }}</p>
                     </div>
 
                     <div class="bg-sky-50 rounded-xl px-4 py-3">
-                        <p class="text-xs text-blue-600 font-semibold">Company</p>
-                        <p class="text-blue-900">{{ $profile->company ?? 'Not set' }}</p>
-                    </div>
-
-                    <div class="bg-sky-50 rounded-xl px-4 py-3">
-                        <p class="text-xs text-blue-600 font-semibold">Job Title</p>
-                        <p class="text-blue-900">{{ $profile->job_title ?? 'Not set' }}</p>
-                    </div>
-
-                    <div class="md:col-span-2 bg-sky-50 rounded-xl px-4 py-3">
-                        <p class="text-xs text-blue-600 font-semibold">Location</p>
-                        <p class="text-blue-900">
-                            {{ ($profile->district ?? '') . (($profile->district && $profile->mukim) ? ', ' : '') . ($profile->mukim ?? '') . (($profile->district || $profile->mukim) ? ', ' : '') . ($profile->country ?? 'Brunei Darussalam') }}
-                        </p>
-                    </div>
-
-                    <div class="md:col-span-2 bg-sky-50 rounded-xl px-4 py-3">
-                        <p class="text-xs text-blue-600 font-semibold">Coordinates</p>
-                        <p class="text-blue-900">{{ $profile->latitude && $profile->longitude ? $profile->latitude . ', ' . $profile->longitude : 'Not set' }}</p>
-                    </div>
-
-                    <div class="md:col-span-2 bg-sky-50 rounded-xl px-4 py-3">
-                        <p class="text-xs text-blue-600 font-semibold">Bio</p>
-                        <p class="text-blue-900 break-words">{{ $profile->bio ?? 'Not set' }}</p>
+                        <p class="text-xs text-blue-600 font-semibold">Birth Date</p>
+                        <p class="text-blue-900">{{ optional($profile->birth_date)->format('d M Y') ?? 'Not set' }}</p>
                     </div>
                 </div>
             </div>
@@ -217,9 +190,8 @@ setInterval(createBubble, 400);
     <!-- Footer -->
     <footer class="relative z-10 text-center text-blue-800/80 py-5 text-sm backdrop-blur-sm bg-white/20 mt-8 border-t border-white/40">
         <div class="flex justify-center gap-6 mb-2">
-            <a href="#" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-github"></i></a>
+            <a href="https://x.com/AquWatch" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/aquwatch/" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-instagram"></i></a>
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>

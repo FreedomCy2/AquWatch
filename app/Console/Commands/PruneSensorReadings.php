@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\FloodReading;
 use App\Models\FlowReading;
+use App\Models\Profile;
 use App\Models\RainReading;
 use Illuminate\Console\Command;
 
@@ -29,7 +30,19 @@ class PruneSensorReadings extends Command
     public function handle(): int
     {
         $defaultDays = (int) config('services.sensors.reading_retention_days', 30);
-        $days = (int) ($this->option('days') ?: $defaultDays);
+
+        $preferenceDays = Profile::query()
+            ->whereNotNull('preferences')
+            ->get()
+            ->map(function (Profile $profile): ?int {
+                $value = data_get($profile->preferences, 'retention_days');
+
+                return is_numeric($value) ? (int) $value : null;
+            })
+            ->filter(fn (?int $days): bool => in_array($days, [7, 30, 90, 365], true))
+            ->min();
+
+        $days = (int) ($this->option('days') ?: ($preferenceDays ?: $defaultDays));
 
         if ($days < 1) {
             $this->error('Retention days must be at least 1.');

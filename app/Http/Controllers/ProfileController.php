@@ -9,19 +9,6 @@ use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
-    private const DISTRICTS = [
-        'Brunei-Muara',
-        'Belait',
-        'Tutong',
-        'Temburong',
-    ];
-
-    private const ROLES = [
-        'owner',
-        'responder',
-        'viewer',
-    ];
-
     private const LANGUAGES = [
         'en',
         'ms',
@@ -47,8 +34,6 @@ class ProfileController extends Controller
         return view('profile-edit', [
             'user' => $user,
             'profile' => $profile,
-            'districts' => self::DISTRICTS,
-            'roles' => self::ROLES,
             'languages' => self::LANGUAGES,
             'timezones' => self::TIMEZONES,
         ]);
@@ -68,25 +53,9 @@ class ProfileController extends Controller
             ],
             'timezone' => ['nullable', Rule::in(self::TIMEZONES)],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
-
             'phone' => ['nullable', 'string', 'max:50'],
-            'bio' => ['nullable', 'string', 'max:1000'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'city' => ['nullable', 'string', 'max:255'],
-            'country' => ['nullable', 'string', 'max:255'],
-            'birth_date' => ['nullable', 'date'],
-            'role' => ['nullable', Rule::in(self::ROLES)],
             'preferred_language' => ['nullable', Rule::in(self::LANGUAGES)],
-            'district' => ['nullable', Rule::in(self::DISTRICTS)],
-            'mukim' => ['nullable', 'string', 'max:255'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'company' => ['nullable', 'string', 'max:255'],
-            'job_title' => ['nullable', 'string', 'max:255'],
-            'website' => ['nullable', 'string', 'max:255'],
-            'twitter' => ['nullable', 'string', 'max:255'],
-            'linkedin' => ['nullable', 'string', 'max:255'],
-            'github' => ['nullable', 'string', 'max:255'],
+            'birth_date' => ['nullable', 'date'],
         ]);
 
         // Update users table
@@ -112,23 +81,8 @@ class ProfileController extends Controller
             [
                 'photo' => $photoPath,
                 'phone' => $request->phone,
-                'bio' => $request->bio,
-                'address' => $request->address,
-                'city' => $request->city,
-                'country' => $request->country ?: 'Brunei Darussalam',
-                'birth_date' => $request->birth_date,
-                'role' => $request->role,
                 'preferred_language' => $request->preferred_language,
-                'district' => $request->district,
-                'mukim' => $request->mukim,
-                'latitude' => $request->latitude,
-                'longitude' => $request->longitude,
-                'company' => $request->company,
-                'job_title' => $request->job_title,
-                'website' => $request->website,
-                'twitter' => $request->twitter,
-                'linkedin' => $request->linkedin,
-                'github' => $request->github,
+                'birth_date' => $request->birth_date,
             ]
         );
 

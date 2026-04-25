@@ -73,7 +73,7 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
                 <div>
                     <h1 class="text-3xl md:text-4xl font-extrabold text-blue-900">Edit Profile</h1>
-                    <p class="text-blue-800/80 mt-1">Update your account information.</p>
+                    <p class="text-blue-800/80 mt-1">Update your personal information.</p>
                 </div>
 
                 <div class="flex gap-3">
@@ -135,18 +135,6 @@
                         </div>
 
                         <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Role</label>
-                            <select name="role"
-                                    class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                                <option value="">Select role</option>
-                                @php $selectedRole = old('role', $profile->role); @endphp
-                                @foreach($roles as $role)
-                                    <option value="{{ $role }}" {{ $selectedRole === $role ? 'selected' : '' }}>{{ ucfirst($role) }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
                             <label class="block mb-2 text-sm font-semibold text-blue-900">Preferred Language</label>
                             <select name="preferred_language"
                                     class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
@@ -160,90 +148,6 @@
                             <label class="block mb-2 text-sm font-semibold text-blue-900">Birth Date</label>
                             <input type="date" name="birth_date" value="{{ old('birth_date', optional($profile->birth_date)->format('Y-m-d')) }}"
                                    class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Company</label>
-                            <input type="text" name="company" value="{{ old('company', $profile->company) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Job Title</label>
-                            <input type="text" name="job_title" value="{{ old('job_title', $profile->job_title) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Address</label>
-                            <input type="text" name="address" value="{{ old('address', $profile->address) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">District</label>
-                            <select name="district"
-                                    class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                                <option value="">Select district</option>
-                                @php $selectedDistrict = old('district', $profile->district); @endphp
-                                @foreach($districts as $district)
-                                    <option value="{{ $district }}" {{ $selectedDistrict === $district ? 'selected' : '' }}>{{ $district }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Mukim (Optional)</label>
-                            <input type="text" name="mukim" value="{{ old('mukim', $profile->mukim) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Latitude (Optional)</label>
-                            <input type="number" step="0.000001" name="latitude" value="{{ old('latitude', $profile->latitude) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Longitude (Optional)</label>
-                            <input type="number" step="0.000001" name="longitude" value="{{ old('longitude', $profile->longitude) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Country</label>
-                            <input type="text" name="country" value="{{ old('country', $profile->country ?: 'Brunei Darussalam') }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-slate-50 text-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Website</label>
-                            <input type="text" name="website" value="{{ old('website', $profile->website) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Twitter</label>
-                            <input type="text" name="twitter" value="{{ old('twitter', $profile->twitter) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">LinkedIn</label>
-                            <input type="text" name="linkedin" value="{{ old('linkedin', $profile->linkedin) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div>
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">GitHub</label>
-                            <input type="text" name="github" value="{{ old('github', $profile->github) }}"
-                                   class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block mb-2 text-sm font-semibold text-blue-900">Bio</label>
-                            <textarea name="bio" rows="5"
-                                      class="w-full rounded-xl border border-blue-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400">{{ old('bio', $profile->bio) }}</textarea>
                         </div>
                     </div>
 
@@ -261,9 +165,8 @@
     <!-- Footer -->
     <footer class="relative z-10 text-center text-blue-800/80 py-5 text-sm backdrop-blur-sm bg-white/20 mt-8 border-t border-white/40">
         <div class="flex justify-center gap-6 mb-2">
-            <a href="#" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-twitter"></i></a>
-            <a href="#" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-linkedin-in"></i></a>
-            <a href="#" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-github"></i></a>
+            <a href="https://x.com/AquWatch" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.instagram.com/aquwatch/" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-800 transition-all duration-200 transform hover:scale-110 inline-block"><i class="fab fa-instagram"></i></a>
         </div>
         <p class="text-xs">
             <i class="fas fa-water mr-1"></i>
