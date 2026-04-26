@@ -7,13 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-200 to-teal-200 text-slate-800">
+<body class="min-h-screen overflow-x-hidden bg-gradient-to-br from-sky-200 via-cyan-200 to-teal-200 text-slate-800">
     <header class="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div>
-            <h1 class="text-3xl font-black text-blue-900">AquWatch Admin <span class="text-sm bg-rose-400 text-white px-2 py-1 rounded-full align-middle">Admin Panel</span></h1>
+            <h1 class="text-2xl sm:text-3xl font-black text-blue-900 leading-tight">AquWatch Admin <span class="inline-flex whitespace-nowrap text-xs sm:text-sm bg-rose-400 text-white px-2 py-1 rounded-full align-middle mt-1 sm:mt-0">Admin Panel</span></h1>
             <p class="text-blue-800/80 text-sm">System Control Center</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('dashboard') }}" class="px-3 py-2 rounded-xl bg-white/70 border border-white font-semibold text-blue-900">
                 <i class="fas fa-user-shield mr-1"></i> Admin
             </a>
@@ -26,7 +26,7 @@
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 pb-24 md:pb-10 space-y-6">
+    <main class="max-w-6xl mx-auto px-4 pb-28 md:pb-10 space-y-6">
         @if (session('success'))
             <div class="rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3">{{ session('success') }}</div>
         @endif
@@ -204,7 +204,7 @@
         </section>
     </main>
 
-    <nav class="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/90 backdrop-blur-md border-t border-white/80 shadow-[0_-6px_18px_rgba(20,80,120,0.12)]">
+    <nav class="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/90 backdrop-blur-md border-t border-white/80 shadow-[0_-6px_18px_rgba(20,80,120,0.12)] pb-[env(safe-area-inset-bottom)]">
         <div class="grid grid-cols-5 gap-1 px-2 py-2 text-[11px] font-semibold text-blue-900">
             <a href="{{ route('admin.dashboard') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 bg-sky-100/80">
                 <i class="fas fa-house text-sm"></i>
