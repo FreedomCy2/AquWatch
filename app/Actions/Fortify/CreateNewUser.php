@@ -22,7 +22,7 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             ...$this->profileRules(),
-            'role' => ['required', Rule::in(['user', 'admin'])],
+            'role' => ['nullable', Rule::in(['user', 'admin'])],
             'admin_code' => ['nullable', 'string'],
             'password' => $this->passwordRules(),
         ])->after(function ($validator) use ($input): void {
