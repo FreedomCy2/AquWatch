@@ -35,6 +35,20 @@ Route::get('/', function () {
         ]);
 })->name('home');
 
+        Route::get('/sensor-status', function () {
+            $totalSensors = Sensor::query()->where('is_active', true)->count();
+            $onlineSensors = Sensor::query()
+                ->where('is_active', true)
+                ->where('last_seen_at', '>=', now()->subMinutes(2))
+                ->count();
+
+            return response()->json([
+                'totalSensors' => $totalSensors,
+                'onlineSensors' => $onlineSensors,
+                'allSensorsOnline' => $totalSensors > 0 && $onlineSensors === $totalSensors,
+            ]);
+        })->name('sensor-status.data');
+
 Route::get('/plans', [PlanController::class, 'index'])->name('plans');
 
 Route::middleware(['auth'])->group(function () {

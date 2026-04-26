@@ -228,14 +228,14 @@
                 </p>
                 
                 <!-- Live indicator badge (interactive) -->
-                <div class="inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm rounded-full px-4 py-1.5 mb-8 shadow-sm border {{ $allSensorsOnline ? 'border-cyan-200' : 'border-amber-300' }}">
+                <div id="sensor-status-pill" class="inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm rounded-full px-4 py-1.5 mb-8 shadow-sm border {{ $allSensorsOnline ? 'border-cyan-200' : 'border-amber-300' }}">
                     <span class="relative flex h-3 w-3">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $allSensorsOnline ? 'bg-green-400' : 'bg-amber-400' }} opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-3 w-3 {{ $allSensorsOnline ? 'bg-green-500' : 'bg-amber-500' }}"></span>
+                        <span id="sensor-status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $allSensorsOnline ? 'bg-green-400' : 'bg-amber-400' }} opacity-75"></span>
+                        <span id="sensor-status-dot" class="relative inline-flex rounded-full h-3 w-3 {{ $allSensorsOnline ? 'bg-green-500' : 'bg-amber-500' }}"></span>
                     </span>
-                    <span class="text-xs font-semibold {{ $allSensorsOnline ? 'text-cyan-800' : 'text-amber-700' }} tracking-wide">
-                        {{ $allSensorsOnline ? 'LIVE MONITORING ACTIVE' : 'MONITORING NOT FULLY ACTIVE' }}
-                        <span class="ml-1">({{ $onlineSensors }}/{{ $totalSensors }} sensors)</span>
+                    <span id="sensor-status-text" class="text-xs font-semibold {{ $allSensorsOnline ? 'text-cyan-800' : 'text-amber-700' }} tracking-wide">
+                        <span id="sensor-status-label">{{ $allSensorsOnline ? 'LIVE MONITORING ACTIVE' : 'MONITORING NOT FULLY ACTIVE' }}</span>
+                        <span id="sensor-status-count" class="ml-1">({{ $onlineSensors }}/{{ $totalSensors }} sensors)</span>
                     </span>
                     <i class="fas fa-waveform text-cyan-600 ml-1"></i>
                 </div>
@@ -314,6 +314,63 @@
         
         setInterval(createBubble, 380);
         for (let i = 0; i < 12; i++) setTimeout(createBubble, i * 200);
+
+        const sensorStatusUrl = @json(route('sensor-status.data'));
+
+        async function refreshSensorStatus() {
+            try {
+                const response = await fetch(sensorStatusUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const payload = await response.json();
+                const totalSensors = Number(payload?.totalSensors ?? 0);
+                const onlineSensors = Number(payload?.onlineSensors ?? 0);
+                const allSensorsOnline = Boolean(payload?.allSensorsOnline);
+
+                const pill = document.getElementById('sensor-status-pill');
+                const ping = document.getElementById('sensor-status-ping');
+                const dot = document.getElementById('sensor-status-dot');
+                const label = document.getElementById('sensor-status-label');
+                const text = document.getElementById('sensor-status-text');
+                const count = document.getElementById('sensor-status-count');
+
+                if (pill) {
+                    pill.className = `inline-flex items-center gap-2 bg-white/50 backdrop-blur-sm rounded-full px-4 py-1.5 mb-8 shadow-sm border ${allSensorsOnline ? 'border-cyan-200' : 'border-amber-300'}`;
+                }
+
+                if (ping) {
+                    ping.className = `animate-ping absolute inline-flex h-full w-full rounded-full ${allSensorsOnline ? 'bg-green-400' : 'bg-amber-400'} opacity-75`;
+                }
+
+                if (dot) {
+                    dot.className = `relative inline-flex rounded-full h-3 w-3 ${allSensorsOnline ? 'bg-green-500' : 'bg-amber-500'}`;
+                }
+
+                if (text) {
+                    text.className = `text-xs font-semibold ${allSensorsOnline ? 'text-cyan-800' : 'text-amber-700'} tracking-wide`;
+                }
+
+                if (label) {
+                    label.textContent = allSensorsOnline ? 'LIVE MONITORING ACTIVE' : 'MONITORING NOT FULLY ACTIVE';
+                }
+
+                if (count) {
+                    count.textContent = `(${onlineSensors}/${totalSensors} sensors)`;
+                }
+            } catch {
+                // Keep the initial server-rendered status on transient failures.
+            }
+        }
+
+        refreshSensorStatus();
+        setInterval(refreshSensorStatus, 5000);
         
         // Add ripple effect to all buttons with class .ripple-effect dynamically
         document.querySelectorAll('.ripple-effect, .glow-button').forEach(btn => {

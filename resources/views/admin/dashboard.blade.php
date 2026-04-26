@@ -42,8 +42,8 @@
             </div>
             <div class="bg-white/65 rounded-2xl p-5 border border-white shadow">
                 <p class="text-sm text-blue-700">Active Sensors</p>
-                <p class="text-3xl font-black text-blue-900">{{ $activeSensors }}</p>
-                <p class="text-xs text-slate-600">Online now out of {{ $totalSensors }} configured sensors</p>
+                <p id="admin-active-sensors" class="text-3xl font-black text-blue-900">{{ $activeSensors }}</p>
+                <p class="text-xs text-slate-600">Online now out of <span id="admin-total-sensors">{{ $totalSensors }}</span> configured sensors</p>
             </div>
             <div class="bg-white/65 rounded-2xl p-5 border border-white shadow">
                 <p class="text-sm text-blue-700">Total Announcements</p>
@@ -230,9 +230,41 @@
     </nav>
 
     <script>
+        const sensorStatusUrl = @json(route('sensor-status.data'));
         const adminFlowUrl = @json(route('contents.flow-display.data'));
         const adminRainUrl = @json(route('contents.rain-display.data'));
         const adminFloodUrl = @json(route('contents.flood-display.data'));
+
+        async function refreshSensorStatus() {
+            try {
+                const response = await fetch(sensorStatusUrl, {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const payload = await response.json();
+                const activeSensors = Number(payload?.onlineSensors ?? 0);
+                const totalSensors = Number(payload?.totalSensors ?? 0);
+
+                const activeEl = document.getElementById('admin-active-sensors');
+                const totalEl = document.getElementById('admin-total-sensors');
+
+                if (activeEl) {
+                    activeEl.textContent = String(activeSensors);
+                }
+
+                if (totalEl) {
+                    totalEl.textContent = String(totalSensors);
+                }
+            } catch {
+                // Keep the initial server-rendered values on transient failures.
+            }
+        }
 
         function rainLabel(level) {
             if (level === 'heavy_rain') return 'Heavy Rain';
@@ -376,9 +408,11 @@
         refreshAdminRainCard();
         refreshAdminFloodCard();
         refreshAdminFlowCard();
+        refreshSensorStatus();
         setInterval(refreshAdminRainCard, 4000);
         setInterval(refreshAdminFloodCard, 4000);
         setInterval(refreshAdminFlowCard, 4000);
+        setInterval(refreshSensorStatus, 5000);
     </script>
 </body>
 </html>
