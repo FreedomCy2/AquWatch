@@ -8,10 +8,11 @@
   - Each sensor signal must use a separate GPIO pin.
 
   API endpoint expected:
-  POST http://aquwatch.test/api/ingest/flow
+  POST https://aquwatch.org/api/ingest/flow
 */
 
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <time.h>
 
@@ -24,7 +25,7 @@ const char* WIFI_SSID = "DecoA";
 const char* WIFI_PASSWORD = "315321TKB";
 
 // Laravel API settings
-const char* API_URL = "http://192.168.68.105:8082/api/ingest/flow";
+const char* API_URL = "https://aquwatch.org/api/ingest/flow";
 const char* SENSOR_TOKEN = "aqw_1f8d7a9b3c4e6f2a91d0b7e5c3a8f6d4b2c9e1a7f3d5b8c0";
 const char* SENSOR_A_ID = "flow-esp32-p27";
 const char* SENSOR_B_ID = "flow-esp32-p26";
@@ -134,10 +135,13 @@ void postReading(const char* sensorId, float flowLpm, uint64_t totalMl) {
     return;
   }
 
+  WiFiClientSecure client;
+  client.setInsecure();
+
   HTTPClient http;
   http.setConnectTimeout(6000);
   http.setTimeout(6000);
-  http.begin(API_URL);
+  http.begin(client, API_URL);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Accept", "application/json");
   http.addHeader("X-Sensor-Token", SENSOR_TOKEN);

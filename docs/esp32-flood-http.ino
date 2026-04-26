@@ -4,6 +4,7 @@
 */
 
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 
 const int S1 = 18;
@@ -17,7 +18,7 @@ const int RED_LED = 27;
 const char* WIFI_SSID = "DecoA";
 const char* WIFI_PASSWORD = "315321TKB";
 
-const char* API_URL = "http://192.168.68.105:8082/api/ingest/flood";
+const char* API_URL = "https://aquwatch.org/api/ingest/flood";
 const char* SENSOR_TOKEN = "aqw_1f8d7a9b3c4e6f2a91d0b7e5c3a8f6d4b2c9e1a7f3d5b8c0";
 const char* SENSOR_ID = "flood-esp32-01";
 
@@ -113,10 +114,13 @@ void postFloodReading(const String& status, bool s1Wet, bool s2Wet, bool s3Wet, 
     return;
   }
 
+  WiFiClientSecure client;
+  client.setInsecure();
+
   HTTPClient http;
   http.setConnectTimeout(6000);
   http.setTimeout(6000);
-  http.begin(API_URL);
+  http.begin(client, API_URL);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Accept", "application/json");
   http.addHeader("X-Sensor-Token", SENSOR_TOKEN);
