@@ -7,11 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="min-h-screen bg-gradient-to-br from-sky-200 via-cyan-200 to-teal-200">
+<body class="min-h-screen overflow-x-hidden bg-gradient-to-br from-sky-200 via-cyan-200 to-teal-200">
     <main class="max-w-5xl mx-auto px-4 py-8 space-y-6">
-        <div class="flex items-center justify-between">
-            <h1 class="text-3xl font-black text-blue-900">Announcements</h1>
-            <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-xl bg-white/80 border border-white text-blue-900 font-semibold">Back to Dashboard</a>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h1 class="text-2xl sm:text-3xl font-black text-blue-900 leading-tight">Announcements</h1>
+            <a href="{{ route('dashboard') }}" class="inline-flex w-fit max-w-full px-4 py-2 rounded-xl bg-white/80 border border-white text-blue-900 font-semibold break-words">Back to Dashboard</a>
         </div>
 
         <section class="bg-white/70 rounded-2xl border border-white shadow p-5">
