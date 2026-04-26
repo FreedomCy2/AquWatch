@@ -23,6 +23,12 @@ class SensorIngestionController extends Controller
 
         $acceptLegacyToken = (bool) config('services.sensors.accept_legacy_token', true);
 
+        // If legacy token is accepted but not configured, allow any token for bootstrapping new sensors
+        if ($acceptLegacyToken && $configuredToken === '') {
+            return true;
+        }
+
+        // If legacy token is configured, check it
         if ($acceptLegacyToken && $configuredToken !== '' && hash_equals($configuredToken, $providedToken)) {
             return true;
         }
@@ -31,6 +37,7 @@ class SensorIngestionController extends Controller
             return false;
         }
 
+        // Check sensor-specific token
         $sensor = Sensor::query()
             ->where('sensor_id', $sensorId)
             ->where('is_active', true)
