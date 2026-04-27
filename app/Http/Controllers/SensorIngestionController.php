@@ -6,6 +6,7 @@ use App\Models\FlowReading;
 use App\Models\FloodReading;
 use App\Models\RainReading;
 use App\Models\Sensor;
+use App\Services\AutoSensorAlertService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -103,7 +104,7 @@ class SensorIngestionController extends Controller
         ]);
     }
 
-    public function storeRain(Request $request): JsonResponse
+    public function storeRain(Request $request, AutoSensorAlertService $autoSensorAlert): JsonResponse
     {
         $sensorId = (string) $request->input('sensor_id', '');
 
@@ -131,6 +132,7 @@ class SensorIngestionController extends Controller
         ]);
 
         $this->touchSensor((string) $validated['sensor_id'], 'rain');
+        $autoSensorAlert->onRainReading($reading);
 
         return response()->json([
             'ok' => true,
@@ -139,7 +141,7 @@ class SensorIngestionController extends Controller
         ]);
     }
 
-    public function storeFlood(Request $request): JsonResponse
+    public function storeFlood(Request $request, AutoSensorAlertService $autoSensorAlert): JsonResponse
     {
         $sensorId = (string) $request->input('sensor_id', '');
 
@@ -173,6 +175,7 @@ class SensorIngestionController extends Controller
         ]);
 
         $this->touchSensor((string) $validated['sensor_id'], 'flood');
+        $autoSensorAlert->onFloodReading($reading);
 
         return response()->json([
             'ok' => true,

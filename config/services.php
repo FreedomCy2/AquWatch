@@ -39,6 +39,8 @@ return [
         'ingest_token' => env('SENSOR_INGEST_TOKEN'),
         'accept_legacy_token' => env('SENSOR_ACCEPT_LEGACY_TOKEN', true),
         'reading_retention_days' => (int) env('SENSOR_READING_RETENTION_DAYS', 30),
+        'auto_alert_push' => env('SENSOR_AUTO_ALERT_PUSH', true),
+        'auto_alert_cooldown_seconds' => (int) env('SENSOR_AUTO_ALERT_COOLDOWN_SECONDS', 180),
     ],
 
     'ai' => [
