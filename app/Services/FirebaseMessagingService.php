@@ -38,15 +38,16 @@ class FirebaseMessagingService
             ];
         }
 
-        $accessToken = $this->issueAccessToken();
+        $accessTokenResult = $this->issueAccessToken();
+        $accessToken = $accessTokenResult['token'];
 
-        if ($accessToken === null) {
+        if (! is_string($accessToken) || $accessToken === '') {
             return [
                 'attempted' => 0,
                 'sent' => 0,
                 'failed' => 0,
                 'skipped' => true,
-                'reason' => 'Failed to issue Firebase access token.',
+                'reason' => 'Failed to issue Firebase access token. '.(string) ($accessTokenResult['reason'] ?? ''),
             ];
         }
 
@@ -120,19 +121,29 @@ class FirebaseMessagingService
         ];
     }
 
-    private function issueAccessToken(): ?string
+    /**
+     * @return array{token:?string, reason:?string}
+     */
+    private function issueAccessToken(): array
     {
-        $serviceAccount = $this->loadServiceAccount();
+        $serviceAccountResult = $this->loadServiceAccount();
+        $serviceAccount = $serviceAccountResult['data'];
 
-        if (! $serviceAccount) {
-            return null;
+        if (! is_array($serviceAccount)) {
+            return [
+                'token' => null,
+                'reason' => (string) ($serviceAccountResult['reason'] ?? 'Service account unavailable.'),
+            ];
         }
 
         $privateKey = (string) ($serviceAccount['private_key'] ?? '');
         $clientEmail = (string) ($serviceAccount['client_email'] ?? '');
 
         if ($privateKey === '' || $clientEmail === '') {
-            return null;
+            return [
+                'token' => null,
+                'reason' => 'Service account JSON missing private_key or client_email.',
+            ];
         }
 
         $now = time();
@@ -156,7 +167,12 @@ class FirebaseMessagingService
         $signResult = openssl_sign($unsignedToken, $signature, $privateKey, OPENSSL_ALGO_SHA256);
 
         if (! $signResult) {
-            return null;
+            $opensslError = openssl_error_string();
+
+            return [
+                'token' => null,
+                'reason' => 'OpenSSL signing failed.'.($opensslError ? ' '.$opensslError : ''),
+            ];
         }
 
         $jwt = $unsignedToken.'.'.$this->base64UrlEncode($signature);
@@ -170,26 +186,46 @@ class FirebaseMessagingService
             ]);
 
         if (! $response->successful()) {
+            $errorDescription = (string) ($response->json('error_description') ?? $response->json('error') ?? '');
+
             Log::warning('Google OAuth token request failed.', [
                 'status' => $response->status(),
                 'body' => $response->json() ?? $response->body(),
             ]);
 
-            return null;
+            return [
+                'token' => null,
+                'reason' => 'OAuth token request failed (HTTP '.$response->status().'). '.$errorDescription,
+            ];
         }
 
-        return (string) ($response->json('access_token') ?? '');
+        $token = (string) ($response->json('access_token') ?? '');
+
+        if ($token === '') {
+            return [
+                'token' => null,
+                'reason' => 'OAuth response did not include access_token.',
+            ];
+        }
+
+        return [
+            'token' => $token,
+            'reason' => null,
+        ];
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return array{data:?array<string, mixed>, reason:?string}
      */
-    private function loadServiceAccount(): ?array
+    private function loadServiceAccount(): array
     {
         $configuredPath = (string) config('services.firebase.service_account_path', '');
 
         if ($configuredPath === '') {
-            return null;
+            return [
+                'data' => null,
+                'reason' => 'Missing FIREBASE_SERVICE_ACCOUNT_PATH.',
+            ];
         }
 
         $path = str_starts_with($configuredPath, DIRECTORY_SEPARATOR)
@@ -199,18 +235,34 @@ class FirebaseMessagingService
         if (! is_file($path)) {
             Log::warning('Firebase service account file not found.', ['path' => $path]);
 
-            return null;
+            return [
+                'data' => null,
+                'reason' => 'Service account file not found at '.$path,
+            ];
         }
 
         $json = file_get_contents($path);
 
         if (! is_string($json) || $json === '') {
-            return null;
+            return [
+                'data' => null,
+                'reason' => 'Service account file is empty or unreadable.',
+            ];
         }
 
         $decoded = json_decode($json, true);
 
-        return is_array($decoded) ? $decoded : null;
+        if (! is_array($decoded)) {
+            return [
+                'data' => null,
+                'reason' => 'Service account JSON is invalid.',
+            ];
+        }
+
+        return [
+            'data' => $decoded,
+            'reason' => null,
+        ];
     }
 
     /**
