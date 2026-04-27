@@ -57,6 +57,9 @@ return [
         'web_app_id' => env('FIREBASE_WEB_APP_ID'),
         'web_measurement_id' => env('FIREBASE_WEB_MEASUREMENT_ID'),
         'web_vapid_key' => env('FIREBASE_WEB_VAPID_KEY'),
+        'project_id' => env('FIREBASE_PROJECT_ID', env('FIREBASE_WEB_PROJECT_ID')),
+        'service_account_path' => env('FIREBASE_SERVICE_ACCOUNT_PATH'),
+        'enable_push' => env('FIREBASE_ENABLE_PUSH', false),
     ],
 
 ];

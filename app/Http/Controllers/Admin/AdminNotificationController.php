@@ -5,13 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Services\FirebaseMessagingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AdminNotificationController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, FirebaseMessagingService $firebaseMessaging): RedirectResponse
     {
         $validated = $request->validate([
             'user_id' => ['nullable', 'exists:users,id'],
@@ -19,14 +20,31 @@ class AdminNotificationController extends Controller
             'message' => ['required', 'string', 'max:3000'],
         ]);
 
-        UserNotification::query()->create([
+        $notification = UserNotification::query()->create([
             'user_id' => $validated['user_id'] ?? null,
             'title' => $validated['title'],
             'message' => $validated['message'],
             'sent_by' => (int) auth()->id(),
         ]);
 
-        return redirect()->route('admin.dashboard')->with('success', 'Notification sent.');
+        $push = $firebaseMessaging->sendUserNotification($notification);
+
+        if (($push['skipped'] ?? false) === true) {
+            $reason = (string) ($push['reason'] ?? 'Push not configured.');
+
+            return redirect()->route('admin.dashboard')
+                ->with('success', 'Notification saved. Push skipped: '.$reason);
+        }
+
+        return redirect()->route('admin.dashboard')->with(
+            'success',
+            sprintf(
+                'Notification sent. Push attempted: %d, delivered: %d, failed: %d.',
+                (int) ($push['attempted'] ?? 0),
+                (int) ($push['sent'] ?? 0),
+                (int) ($push['failed'] ?? 0)
+            )
+        );
     }
 
     public function edit(UserNotification $notification): View
