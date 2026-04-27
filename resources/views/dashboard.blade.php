@@ -323,7 +323,7 @@
                         <span id="live-time">--:-- --</span>
                     </div>
 
-                    <a href="{{ route('contents.announcements') }}"
+                          <a href="{{ route('contents.notifications') }}"
                        class="relative flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap"
                        title="Notifications">
                         <i class="fas fa-bell text-amber-600"></i>
