@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\FcmToken;
 use App\Models\UserNotification;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -35,6 +36,16 @@ class FirebaseMessagingService
                 'failed' => 0,
                 'skipped' => true,
                 'reason' => 'Missing FIREBASE_PROJECT_ID.',
+            ];
+        }
+
+        if (! Schema::hasTable('fcm_tokens')) {
+            return [
+                'attempted' => 0,
+                'sent' => 0,
+                'failed' => 0,
+                'skipped' => true,
+                'reason' => 'Missing database table fcm_tokens. Run php artisan migrate --force.',
             ];
         }
 
