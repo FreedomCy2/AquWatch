@@ -6,6 +6,7 @@ use App\Http\Controllers\FlowDisplayController;
 use App\Http\Controllers\FloodDisplayController;
 use App\Http\Controllers\GraphDisplayController;
 use App\Http\Controllers\RainDisplayController;
+use App\Http\Controllers\FcmTokenController;
 use App\Http\Controllers\RainGraphDisplayController;
 use App\Http\Controllers\AiInsightController;
 use App\Http\Controllers\AiChatController;
@@ -54,6 +55,8 @@ Route::get('/plans', [PlanController::class, 'index'])->name('plans');
 Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('/plans/switch', [PlanController::class, 'switchPlan'])->name('plans.switch');
+    Route::post('/fcm/token', [FcmTokenController::class, 'store'])->name('fcm-token.store');
+    Route::delete('/fcm/token', [FcmTokenController::class, 'destroy'])->name('fcm-token.destroy');
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.legacy.edit');
