@@ -48,4 +48,15 @@ return [
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
     ],
 
+    'firebase' => [
+        'web_api_key' => env('FIREBASE_WEB_API_KEY'),
+        'web_auth_domain' => env('FIREBASE_WEB_AUTH_DOMAIN'),
+        'web_project_id' => env('FIREBASE_WEB_PROJECT_ID'),
+        'web_storage_bucket' => env('FIREBASE_WEB_STORAGE_BUCKET'),
+        'web_messaging_sender_id' => env('FIREBASE_WEB_MESSAGING_SENDER_ID'),
+        'web_app_id' => env('FIREBASE_WEB_APP_ID'),
+        'web_measurement_id' => env('FIREBASE_WEB_MEASUREMENT_ID'),
+        'web_vapid_key' => env('FIREBASE_WEB_VAPID_KEY'),
+    ],
+
 ];

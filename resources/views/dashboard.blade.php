@@ -140,6 +140,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
 
+    <script defer src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/10.12.3/firebase-messaging-compat.js"></script>
+
     <style>
         * {
             font-family: 'Inter', sans-serif;
@@ -883,6 +886,99 @@
         setInterval(refreshRainSummary, 5000);
         setInterval(refreshFloodSummary, 5000);
         setInterval(updateChartSeries, 4000);
+
+        // ========== FIREBASE WEB PUSH TOKEN REGISTRATION ==========
+        const fcmTokenSaveUrl = @json(route('fcm-token.store'));
+        const csrfToken = @json(csrf_token());
+        const firebaseConfig = {
+            apiKey: @json(config('services.firebase.web_api_key')),
+            authDomain: @json(config('services.firebase.web_auth_domain')),
+            projectId: @json(config('services.firebase.web_project_id')),
+            storageBucket: @json(config('services.firebase.web_storage_bucket')),
+            messagingSenderId: @json(config('services.firebase.web_messaging_sender_id')),
+            appId: @json(config('services.firebase.web_app_id')),
+            measurementId: @json(config('services.firebase.web_measurement_id')),
+        };
+        const firebaseVapidKey = @json(config('services.firebase.web_vapid_key'));
+
+        function hasFirebaseWebConfig(config) {
+            return Boolean(
+                config.apiKey &&
+                config.authDomain &&
+                config.projectId &&
+                config.storageBucket &&
+                config.messagingSenderId &&
+                config.appId
+            );
+        }
+
+        async function saveFcmToken(token) {
+            const response = await fetch(fcmTokenSaveUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    token,
+                    platform: 'web',
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save FCM token.');
+            }
+        }
+
+        async function setupFirebaseWebPush() {
+            try {
+                if (!window.isSecureContext || !('Notification' in window) || !('serviceWorker' in navigator)) {
+                    return;
+                }
+
+                if (!hasFirebaseWebConfig(firebaseConfig) || !firebaseVapidKey) {
+                    return;
+                }
+
+                if (!window.firebase?.apps) {
+                    return;
+                }
+
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+
+                const permission = Notification.permission === 'default'
+                    ? await Notification.requestPermission()
+                    : Notification.permission;
+
+                if (permission !== 'granted') {
+                    return;
+                }
+
+                const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                const messaging = firebase.messaging();
+
+                const token = await messaging.getToken({
+                    vapidKey: firebaseVapidKey,
+                    serviceWorkerRegistration: registration,
+                });
+
+                if (!token) {
+                    return;
+                }
+
+                await saveFcmToken(token);
+            } catch (error) {
+                console.warn('FCM setup skipped:', error);
+            }
+        }
+
+        window.addEventListener('load', () => {
+            setupFirebaseWebPush();
+        });
 
         // ========== RIPPLE EFFECT ==========
         document.querySelectorAll('.ripple-btn, .dashboard-card, button').forEach(btn => {
