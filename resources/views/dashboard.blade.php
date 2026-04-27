@@ -2,6 +2,7 @@
     use App\Models\FlowReading;
     use App\Models\FloodReading;
     use App\Models\RainReading;
+    use App\Models\UserNotification;
 
     $dashboardLatestFlowPerSensor = FlowReading::query()
         ->select(['sensor_id', 'flow_lpm', 'total_ml', 'created_at'])
@@ -111,20 +112,11 @@
         ->take(4)
         ->values();
 
-    $alertsSeenAtRaw = session('alerts_seen_at');
-    $alertsSeenAt = is_string($alertsSeenAtRaw) && $alertsSeenAtRaw !== ''
-        ? \Illuminate\Support\Carbon::parse($alertsSeenAtRaw)
-        : null;
-
-    $dashboardRecentAlertCount = $dashboardRecentAlerts
-        ->filter(function (array $alert) use ($alertsSeenAt): bool {
-            $time = $alert['time'] ?? null;
-
-            if (! $time) {
-                return false;
-            }
-
-            return ! $alertsSeenAt || $time->greaterThan($alertsSeenAt);
+    $dashboardRecentAlertCount = UserNotification::query()
+        ->whereNull('read_at')
+        ->where(function ($query): void {
+            $query->whereNull('user_id')
+                ->orWhere('user_id', auth()->id());
         })
         ->count();
 @endphp
@@ -321,20 +313,20 @@
         </div>
 
         <div class="w-full md:w-auto flex flex-col md:items-end gap-3">
-            <div class="w-full md:w-auto overflow-x-auto no-scrollbar">
+            <div class="w-full md:w-auto overflow-x-auto overflow-y-visible no-scrollbar py-1">
                 <div class="flex items-center md:justify-end gap-2 md:gap-3 min-w-max">
                     <div class="hidden md:flex items-center gap-2 bg-white/40 backdrop-blur-sm px-4 py-2 rounded-full text-blue-800 text-sm whitespace-nowrap">
                         <i class="fas fa-clock"></i>
                         <span id="live-time">--:-- --</span>
                     </div>
 
-                    <a href="{{ route('contents.notifications') }}"
+                    <a href="{{ route('contents.announcements') }}"
                        class="relative flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap"
                        title="Notifications">
                         <i class="fas fa-bell text-amber-600"></i>
                         <span class="hidden sm:inline">Notifications</span>
                         @if ($dashboardRecentAlertCount > 0)
-                            <span class="absolute -top-2 -right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">
+                            <span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white">
                                 {{ $dashboardRecentAlertCount }}
                             </span>
                         @endif
