@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AquWatch Admin</title>
@@ -414,5 +415,46 @@
         setInterval(refreshAdminFlowCard, 4000);
         setInterval(refreshSensorStatus, 5000);
     </script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+  const app = initializeApp({
+    apiKey: "{{ env('FIREBASE_WEB_API_KEY') }}",
+    authDomain: "{{ env('FIREBASE_WEB_AUTH_DOMAIN') }}",
+    projectId: "{{ env('FIREBASE_WEB_PROJECT_ID') }}",
+    storageBucket: "{{ env('FIREBASE_WEB_STORAGE_BUCKET') }}",
+    messagingSenderId: "{{ env('FIREBASE_WEB_MESSAGING_SENDER_ID') }}",
+    appId: "{{ env('FIREBASE_WEB_APP_ID') }}"
+  });
+  const messaging = getMessaging(app);
+
+  async function registerFcm() {
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') return;
+      const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      const token = await getToken(messaging, {
+        vapidKey: "{{ env('FIREBASE_WEB_VAPID_KEY') }}",
+        serviceWorkerRegistration: reg
+      });
+      if (!token) return;
+      await fetch('/fcm/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ token, platform: 'web' })
+      });
+    } catch (e) { console.error('FCM register failed', e); }
+  }
+  registerFcm();
+  onMessage(messaging, (payload) => console.log('FG msg', payload));
+</script>
+
+
 </body>
 </html>
