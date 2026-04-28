@@ -18,6 +18,7 @@ use App\Http\Controllers\UserAnnouncementController;
 use App\Http\Controllers\Admin\AdminAnnouncementController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminDiagnosticsController;
 use App\Models\Sensor;
 
 Route::get('/', function () {
@@ -167,4 +168,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+
+    Route::get('/diagnostics/fcm-tokens', [AdminDiagnosticsController::class, 'fcmTokens'])->name('diagnostics.fcm-tokens');
 });
