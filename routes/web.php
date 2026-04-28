@@ -52,6 +52,24 @@ Route::get('/', function () {
 
 Route::get('/plans', [PlanController::class, 'index'])->name('plans');
 
+Route::get('/firebase-messaging-sw-config.js', function () {
+    return response()->stream(function (): void {
+        echo 'self.FIREBASE_CONFIG = '.json_encode([
+            'apiKey' => config('services.firebase.web_api_key'),
+            'authDomain' => config('services.firebase.web_auth_domain'),
+            'projectId' => config('services.firebase.web_project_id'),
+            'storageBucket' => config('services.firebase.web_storage_bucket'),
+            'messagingSenderId' => config('services.firebase.web_messaging_sender_id'),
+            'appId' => config('services.firebase.web_app_id'),
+            'measurementId' => config('services.firebase.web_measurement_id'),
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE).';';
+    }, 200, [
+        'Content-Type' => 'application/javascript; charset=UTF-8',
+        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma' => 'no-cache',
+    ]);
+})->name('firebase-messaging-sw.config');
+
 Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('/plans/switch', [PlanController::class, 'switchPlan'])->name('plans.switch');

@@ -961,6 +961,26 @@
                 const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
                 const messaging = firebase.messaging();
 
+                messaging.onMessage((payload) => {
+                    if (Notification.permission !== 'granted') {
+                        return;
+                    }
+
+                    const title = payload?.notification?.title || 'AquWatch';
+                    const body = payload?.notification?.body || payload?.data?.message || 'You have a new notification.';
+
+                    const notification = new Notification(title, {
+                        body,
+                        icon: '/favicon.ico',
+                        badge: '/favicon.ico',
+                    });
+
+                    notification.onclick = () => {
+                        window.focus();
+                        notification.close();
+                    };
+                });
+
                 const token = await messaging.getToken({
                     vapidKey: firebaseVapidKey,
                     serviceWorkerRegistration: registration,
