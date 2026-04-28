@@ -42,6 +42,8 @@
             </div>
             <div class="bg-white/65 rounded-2xl p-5 border border-white shadow">
                 <p class="text-sm text-blue-700">Active Sensors</p>
+                <p class="text-3xl font-black text-blue-900">{{ $activeSensors }}</p>
+                <p class="text-xs text-slate-600">Online now out of {{ $totalSensors }} configured sensors</p>
                 <p id="admin-active-sensors" class="text-3xl font-black text-blue-900">{{ $activeSensors }}</p>
                 <p class="text-xs text-slate-600">Online now out of <span id="admin-total-sensors">{{ $totalSensors }}</span> configured sensors</p>
             </div>

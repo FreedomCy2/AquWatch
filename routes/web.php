@@ -55,9 +55,10 @@ Route::get('/plans', [PlanController::class, 'index'])->name('plans');
 Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('/plans/switch', [PlanController::class, 'switchPlan'])->name('plans.switch');
-    Route::post('/fcm/token', [FcmTokenController::class, 'store'])->name('fcm-token.store');
-    Route::delete('/fcm/token', [FcmTokenController::class, 'destroy'])->name('fcm-token.destroy');
 
+        Route::post('/fcm/token', [FcmTokenController::class, 'store'])->name('fcm-token.store');
+        Route::delete('/fcm/token', [FcmTokenController::class, 'destroy'])->name('fcm-token.destroy');
+        
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.legacy.edit');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.legacy.update');
