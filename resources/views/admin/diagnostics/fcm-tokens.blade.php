@@ -4,6 +4,12 @@
 <div class="p-6 max-w-6xl mx-auto">
     <h1 class="text-3xl font-bold mb-6">FCM Tokens Diagnostics</h1>
 
+    @if (! $tableExists)
+        <div class="mb-6 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900">
+            The <strong>fcm_tokens</strong> table is missing on this database. Run <code>php artisan migrate --force</code> on the VPS first, then reload this page.
+        </div>
+    @endif
+
     <div class="mb-8">
         <h2 class="text-2xl font-semibold mb-4">Users & Their Tokens</h2>
         <div class="overflow-x-auto">
