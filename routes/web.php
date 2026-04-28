@@ -135,9 +135,6 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::post('/fcm/token', [FcmTokenController::class, 'store'])->name('fcm.token.store');
-    Route::delete('/fcm/token', [FcmTokenController::class, 'destroy'])->name('fcm.token.destroy');
-
     Route::post('/announcements', [AdminAnnouncementController::class, 'store'])->name('announcements.store');
     Route::get('/announcements/{announcement}/edit', [AdminAnnouncementController::class, 'edit'])->name('announcements.edit');
     Route::put('/announcements/{announcement}', [AdminAnnouncementController::class, 'update'])->name('announcements.update');
