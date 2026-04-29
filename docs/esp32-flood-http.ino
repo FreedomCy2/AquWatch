@@ -209,7 +209,7 @@ void loop() {
   if (s3Triggered) {
     updateSystem("CRITICAL");
   } else if (s2Triggered) {
-    if (riseTimeSec > 0 && riseTimeSec < 45) {
+    if (riseTimeSec > 0 && riseTimeSec < 5) {
       updateSystem("FLASH FLOOD WARNING");
     } else {
       updateSystem("NORMAL RISE");

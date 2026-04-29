@@ -66,10 +66,10 @@
     $dashboardFloodRiseSec = (int) ($dashboardLatestFlood?->rise_time_sec ?? 0);
     $dashboardHasRecentFlood = $dashboardLatestFlood?->created_at?->greaterThanOrEqualTo(now()->subSeconds(20)) ?? false;
     $dashboardFloodCardState = match ($dashboardFloodStatus) {
-        'CRITICAL' => 'Critical',
+        'CRITICAL' => 'Watch for Flood',
         'FLASH FLOOD WARNING' => 'Flash Flood Warning',
         'NORMAL RISE' => 'Normal Rise',
-        'LEVEL 1 DETECTED' => 'Level 1 Detected',
+        'LEVEL 1 DETECTED' => 'Water is Rising',
         default => 'Safe / Dry',
     };
     $dashboardFloodBarPercent = match ($dashboardFloodStatus) {

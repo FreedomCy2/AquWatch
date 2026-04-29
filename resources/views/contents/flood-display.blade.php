@@ -163,10 +163,10 @@
         }
 
         function toShortStatus(status) {
-            if (status === 'CRITICAL') return 'Critical';
+            if (status === 'CRITICAL') return 'Watch for Flood';
             if (status === 'FLASH FLOOD WARNING') return 'Flash Flood Warning';
             if (status === 'NORMAL RISE') return 'Normal Rise';
-            if (status === 'LEVEL 1 DETECTED') return 'Level 1 Detected';
+            if (status === 'LEVEL 1 DETECTED') return 'Water is Rising';
             return 'Safe / Dry';
         }
 

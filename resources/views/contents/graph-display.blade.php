@@ -337,10 +337,10 @@
                             color: '#0f172a',
                             stepSize: 1,
                             callback: function(value) {
-                                if (Number(value) === 4) return 'Critical';
+                                if (Number(value) === 4) return 'Watch for Flood';
                                 if (Number(value) === 3) return 'Flash Warning';
                                 if (Number(value) === 2) return 'Normal Rise';
-                                if (Number(value) === 1) return 'Level 1';
+                                if (Number(value) === 1) return 'Water is Rising';
                                 return 'Safe';
                             },
                         },
@@ -366,10 +366,10 @@
         }
 
         function floodStatusLabel(status) {
-            if (status === 'CRITICAL') return 'Critical';
+            if (status === 'CRITICAL') return 'Watch for Flood';
             if (status === 'FLASH FLOOD WARNING') return 'Flash Flood Warning';
             if (status === 'NORMAL RISE') return 'Normal Rise';
-            if (status === 'LEVEL 1 DETECTED') return 'Level 1 Detected';
+            if (status === 'LEVEL 1 DETECTED') return 'Water is Rising';
             return 'Safe / Dry';
         }
 

@@ -40,9 +40,9 @@ class AutoSensorAlertService
         $status = (string) $reading->status;
 
         $title = match ($status) {
-            'CRITICAL' => 'Critical flood alert',
+            'CRITICAL' => 'Watch for Flood alert',
             'FLASH FLOOD WARNING' => 'Flash flood warning',
-            'NORMAL RISE', 'LEVEL 1 DETECTED' => 'Flood warning',
+            'NORMAL RISE', 'LEVEL 1 DETECTED' => 'Water is rising - monitor flood sensor',
             default => '',
         };
 

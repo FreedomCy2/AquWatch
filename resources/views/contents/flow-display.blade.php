@@ -157,7 +157,6 @@
         function statusFromFlow(flowLpm, isRecent) {
             const NO_FLOW_THRESHOLD = 0.01;
             const LOW_FLOW_THRESHOLD = 0.25;
-            const HIGH_FLOW_THRESHOLD = 3.0;
 
             if (!isRecent) {
                 return { label: 'No recent data', className: 'text-lg font-bold text-slate-700 mt-1' };
@@ -171,17 +170,12 @@
                 return { label: 'Low Water Flow', className: 'text-lg font-bold text-amber-700 mt-1' };
             }
 
-            if (flowLpm <= HIGH_FLOW_THRESHOLD) {
-                return { label: 'Normal Flow', className: 'text-lg font-bold text-emerald-700 mt-1' };
-            }
-
-            return { label: 'Too Much Flow', className: 'text-lg font-bold text-rose-700 mt-1' };
+            return { label: 'Normal Flow', className: 'text-lg font-bold text-emerald-700 mt-1' };
         }
 
         function statusFromCombinedFlow(flowLpm, isRecent) {
             const NO_FLOW_THRESHOLD = 0.01;
             const LOW_FLOW_THRESHOLD = 0.5;
-            const HIGH_FLOW_THRESHOLD = 6.0;
 
             if (!isRecent) {
                 return { label: 'No recent data', className: 'text-lg font-bold text-slate-700 mt-1' };
@@ -195,11 +189,7 @@
                 return { label: 'Low Water Flow', className: 'text-lg font-bold text-amber-700 mt-1' };
             }
 
-            if (flowLpm <= HIGH_FLOW_THRESHOLD) {
-                return { label: 'Normal Flow', className: 'text-lg font-bold text-emerald-700 mt-1' };
-            }
-
-            return { label: 'Too Much Flow', className: 'text-lg font-bold text-rose-700 mt-1' };
+            return { label: 'Normal Flow', className: 'text-lg font-bold text-emerald-700 mt-1' };
         }
 
         function render(payload) {
