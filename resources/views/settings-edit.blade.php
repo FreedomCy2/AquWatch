@@ -227,6 +227,18 @@
     const i18nPermissionSaveFailed = @json(__('ui.permission_save_failed'));
     const i18nMissingFirebaseConfig = @json(__('ui.permission_missing_firebase'));
 
+    /**
+     * Detect whether we are running inside the AquWatch Android WebView.
+     * MainActivity exposes an AndroidBridge JS interface with isApp() and getFcmToken().
+     */
+    function isRunningInAndroidApp() {
+        try {
+            return !!(window.AndroidBridge && typeof window.AndroidBridge.isApp === 'function' && window.AndroidBridge.isApp());
+        } catch (e) {
+            return false;
+        }
+    }
+
     function hasFirebaseWebConfig(config) {
         return Boolean(
             config.apiKey &&
@@ -238,7 +250,11 @@
         );
     }
 
-    async function saveFcmToken(token) {
+    /**
+     * Save an FCM token against the currently-logged-in user.
+     * platform is "android" when invoked from the Android WebView, "web" otherwise.
+     */
+    async function saveFcmToken(token, platform) {
         const response = await fetch(fcmTokenSaveUrl, {
             method: 'POST',
             headers: {
@@ -249,7 +265,7 @@
             credentials: 'same-origin',
             body: JSON.stringify({
                 token,
-                platform: 'web',
+                platform: platform || 'web',
             }),
         });
 
@@ -287,7 +303,42 @@
         permissionStatusEl.classList.add('text-blue-900', 'opacity-90');
     }
 
-    async function resendNotificationPermission() {
+    /**
+     * When running inside the Android app, grab the native FCM token from the
+     * AndroidBridge and register it as a "android" token for the logged-in user.
+     * This replaces the old browser notification flow for app users so push
+     * notifications go to the phone instead of the browser.
+     */
+    async function enableAndroidAppNotifications() {
+        setPermissionStatus(i18nPermissionProcessing);
+        resendPermissionButton.disabled = true;
+
+        try {
+            const token = (window.AndroidBridge.getFcmToken && window.AndroidBridge.getFcmToken()) || '';
+            if (!token) {
+                // Token not ready yet — FirebaseMessaging.getInstance().token is async on cold start.
+                setPermissionStatus(i18nPermissionSaveFailed, 'error');
+                return;
+            }
+
+            const saved = await saveFcmToken(token, 'android');
+            setPermissionStatus(`${i18nPermissionGranted} (${String(token).slice(-8)})`, 'success');
+            window.dispatchEvent(new CustomEvent('fcm-token-updated', {
+                detail: {
+                    token,
+                    id: saved.id,
+                    platform: 'android',
+                },
+            }));
+        } catch (error) {
+            console.warn('Android app FCM token registration failed:', error);
+            setPermissionStatus(i18nPermissionSaveFailed, 'error');
+        } finally {
+            resendPermissionButton.disabled = false;
+        }
+    }
+
+    async function enableWebBrowserNotifications() {
         if (!window.isSecureContext || !('Notification' in window) || !('serviceWorker' in navigator)) {
             setPermissionStatus(i18nPermissionUnsupported, 'error');
             return;
@@ -332,12 +383,13 @@
                 return;
             }
 
-            const saved = await saveFcmToken(token);
+            const saved = await saveFcmToken(token, 'web');
             setPermissionStatus(`${i18nPermissionGranted} (${String(token).slice(-8)})`, 'success');
             window.dispatchEvent(new CustomEvent('fcm-token-updated', {
                 detail: {
                     token,
                     id: saved.id,
+                    platform: 'web',
                 },
             }));
         } catch (error) {
@@ -348,7 +400,35 @@
         }
     }
 
+    /**
+     * Unified handler: register a mobile token if we're inside the Android app,
+     * otherwise fall back to the browser (web push) flow.
+     */
+    async function resendNotificationPermission() {
+        if (isRunningInAndroidApp()) {
+            await enableAndroidAppNotifications();
+            return;
+        }
+        await enableWebBrowserNotifications();
+    }
+
     resendPermissionButton?.addEventListener('click', resendNotificationPermission);
+
+    // Auto-register the Android token on page load once the user is logged in and
+    // is viewing the settings page inside the app — so the device receives
+    // notifications without needing the user to tap the button every time.
+    if (isRunningInAndroidApp()) {
+        window.addEventListener('load', () => {
+            // Small delay to let Firebase finish fetching the token on cold start.
+            setTimeout(() => {
+                const token = (window.AndroidBridge.getFcmToken && window.AndroidBridge.getFcmToken()) || '';
+                if (!token) return;
+                saveFcmToken(token, 'android').catch((e) => {
+                    console.warn('Auto-register Android FCM token failed:', e);
+                });
+            }, 1500);
+        });
+    }
 </script>
 </body>
 </html>
