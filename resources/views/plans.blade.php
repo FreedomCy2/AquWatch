@@ -41,7 +41,6 @@
         </a>
 
         <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center sm:gap-3">
-            <a href="{{ url('/') }}" class="text-center px-3 sm:px-4 py-2 rounded-lg bg-white/70 border border-cyan-200 text-cyan-800 hover:bg-white transition">Home</a>
             @auth
                 <a href="{{ route('dashboard') }}" class="text-center px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:from-blue-700 hover:to-cyan-700 transition">Dashboard</a>
             @else
