@@ -167,9 +167,13 @@
             document.getElementById('kpi-sensor').textContent = `Sensor: ${latest?.sensor_id ?? '-'}`;
             document.getElementById('kpi-hour').textContent = Number(payload?.stats?.last_hour_warning_count ?? 0).toLocaleString();
 
-            document.getElementById('s1-state').textContent = sensorWetText(Boolean(latest?.s1_wet));
-            document.getElementById('s2-state').textContent = sensorWetText(Boolean(latest?.s2_wet));
-            document.getElementById('s3-state').textContent = sensorWetText(Boolean(latest?.s3_wet));
+            const s1El = document.getElementById('s1-state');
+            const s2El = document.getElementById('s2-state');
+            const s3El = document.getElementById('s3-state');
+
+            if (s1El) s1El.textContent = sensorWetText(Boolean(latest?.s1_wet));
+            if (s2El) s2El.textContent = sensorWetText(Boolean(latest?.s2_wet));
+            if (s3El) s3El.textContent = sensorWetText(Boolean(latest?.s3_wet));
 
             const status = String(latest?.status ?? 'SAFE / DRY');
 
