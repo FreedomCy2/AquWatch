@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ !empty($isHistory) ? 'Past Notification History' : 'Recent Alerts' }} - AquWatch</title>
+    <title>{{ !empty($isHistory) ? __('ui.past_notification_history') : __('ui.recent_alerts') }} - AquWatch</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -44,7 +44,7 @@
             <div class="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-xl backdrop-blur-md md:p-7">
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <h1 class="text-3xl font-extrabold text-cyan-950 md:text-4xl">{{ !empty($isHistory) ? 'Past Notification History' : 'Recent Alert Notifications' }}</h1>
+                        <h1 class="text-3xl font-extrabold text-cyan-950 md:text-4xl">{{ !empty($isHistory) ? __('ui.past_notification_history') : __('ui.recent_alerts') }}</h1>
                         <p class="mt-1 text-cyan-900/80">
                             {{ !empty($isHistory)
                                 ? 'Extended timeline of past flood, rain, and connectivity events.'
@@ -53,15 +53,15 @@
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <a href="{{ route('dashboard') }}" class="rounded-xl bg-cyan-700 px-4 py-2 text-white transition hover:bg-cyan-800">
-                            Dashboard
+                            {{ __('ui.dashboard') }}
                         </a>
                         @if (!empty($isHistory))
                             <a href="{{ route('contents.notifications') }}" class="rounded-xl bg-white/80 px-4 py-2 text-cyan-900 transition hover:bg-white">
-                                Recent Alerts
+                                {{ __('ui.recent_alerts') }}
                             </a>
                         @else
                             <a href="{{ route('contents.notifications.history') }}" class="rounded-xl bg-white/80 px-4 py-2 text-cyan-900 transition hover:bg-white">
-                                Past History
+                                {{ __('ui.past_history') }}
                             </a>
                         @endif
                     </div>
@@ -70,15 +70,15 @@
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div class="rounded-2xl border border-red-200 bg-red-50/80 p-4 shadow-sm">
-                    <p class="text-xs uppercase tracking-wide text-red-800">Critical</p>
+                    <p class="text-xs uppercase tracking-wide text-red-800">{{ __('ui.critical') }}</p>
                     <p class="mt-1 text-3xl font-bold text-red-900">{{ number_format($summary['critical']) }}</p>
                 </div>
                 <div class="rounded-2xl border border-amber-200 bg-amber-50/80 p-4 shadow-sm">
-                    <p class="text-xs uppercase tracking-wide text-amber-800">Warning</p>
+                    <p class="text-xs uppercase tracking-wide text-amber-800">{{ __('ui.warning') }}</p>
                     <p class="mt-1 text-3xl font-bold text-amber-900">{{ number_format($summary['warning']) }}</p>
                 </div>
                 <div class="rounded-2xl border border-sky-200 bg-sky-50/80 p-4 shadow-sm">
-                    <p class="text-xs uppercase tracking-wide text-sky-800">Info</p>
+                    <p class="text-xs uppercase tracking-wide text-sky-800">{{ __('ui.info') }}</p>
                     <p class="mt-1 text-3xl font-bold text-sky-900">{{ number_format($summary['info']) }}</p>
                 </div>
             </div>
@@ -86,13 +86,13 @@
             <div class="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-xl backdrop-blur-md md:p-6">
                 <div class="mb-4 flex items-center gap-2">
                     <i class="fas fa-bell text-amber-500"></i>
-                    <h2 class="text-xl font-bold text-cyan-950">{{ !empty($isHistory) ? 'Timeline (History)' : 'Timeline (Recent)' }}</h2>
+                    <h2 class="text-xl font-bold text-cyan-950">{{ !empty($isHistory) ? __('ui.timeline_history') : __('ui.timeline_recent') }}</h2>
                 </div>
 
                 @if($alerts->isEmpty())
                     <div class="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-emerald-900">
                         <i class="fas fa-check-circle mr-2"></i>
-                        No active alerts right now. All monitored sensors look stable.
+                        {{ __('ui.no_active_alerts') }}
                     </div>
                 @else
                     <div class="space-y-3">

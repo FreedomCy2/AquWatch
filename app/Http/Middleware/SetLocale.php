@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Date;
 
 class SetLocale
 {
@@ -20,6 +22,8 @@ class SetLocale
 
         if (in_array($locale, ['en', 'ms'], true)) {
             App::setLocale($locale);
+            Carbon::setLocale($locale);
+            Date::setLocale($locale);
         }
 
         return $next($request);

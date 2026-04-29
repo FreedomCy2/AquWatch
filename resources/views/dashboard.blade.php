@@ -47,9 +47,9 @@
     $dashboardRainAnalog = (int) ($dashboardLatestRain?->analog_value ?? 0);
     $dashboardRainLevel = (string) ($dashboardLatestRain?->intensity_level ?? 'no_rain');
     $dashboardRainLabel = match ($dashboardRainLevel) {
-        'heavy_rain' => 'Heavy Rain',
-        'rain' => 'Rain',
-        default => 'No Rain',
+        'heavy_rain' => __('ui.heavy_rain'),
+        'rain' => __('ui.rain'),
+        default => __('ui.no_rain'),
     };
     $dashboardHasRecentRain = $dashboardLatestRain?->created_at?->greaterThanOrEqualTo(now()->subSeconds(20)) ?? false;
     $dashboardRainBarPercent = match ($dashboardRainLevel) {
@@ -66,11 +66,11 @@
     $dashboardFloodRiseSec = (int) ($dashboardLatestFlood?->rise_time_sec ?? 0);
     $dashboardHasRecentFlood = $dashboardLatestFlood?->created_at?->greaterThanOrEqualTo(now()->subSeconds(20)) ?? false;
     $dashboardFloodCardState = match ($dashboardFloodStatus) {
-        'CRITICAL' => 'Watch for Flood',
-        'FLASH FLOOD WARNING' => 'Flash Flood Warning',
-        'NORMAL RISE' => 'Normal Rise',
-        'LEVEL 1 DETECTED' => 'Water is Rising',
-        default => 'Safe / Dry',
+        'CRITICAL' => __('ui.watch_for_flood'),
+        'FLASH FLOOD WARNING' => __('ui.flash_flood_warning'),
+        'NORMAL RISE' => __('ui.normal_rise'),
+        'LEVEL 1 DETECTED' => __('ui.water_rising'),
+        default => __('ui.safe_dry'),
     };
     $dashboardFloodBarPercent = match ($dashboardFloodStatus) {
         'CRITICAL' => 100,
@@ -122,7 +122,7 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -311,7 +311,7 @@
      class="h-10 w-auto drop-shadow-md">
             <h1 class="text-xl md:text-2xl font-black bg-gradient-to-r from-blue-800 to-teal-700 bg-clip-text text-transparent">AquWatch</h1>
             <span class="ml-1 md:ml-2 text-xs bg-white/40 backdrop-blur-sm px-2 md:px-3 py-1 rounded-full text-blue-700">
-                <i class="fas fa-chart-line text-xs"></i> LIVE
+                <i class="fas fa-chart-line text-xs"></i> {{ __('ui.live') }}
             </span>
         </div>
 
@@ -325,16 +325,16 @@
 
                           <a href="{{ route('contents.notifications') }}"
                        class="relative flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap"
-                       title="Notifications">
+                       title="{{ __('ui.notifications') }}">
                         <i class="fas fa-bell text-amber-600"></i>
-                        <span class="hidden sm:inline">Notifications</span>
+                        <span class="hidden sm:inline">{{ __('ui.notifications') }}</span>
                     </a>
 
                     <a href="{{ route('contents.announcements') }}"
                        class="relative flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap"
-                       title="Announcements">
+                       title="{{ __('ui.announcements') }}">
                         <i class="fas fa-bullhorn text-orange-500"></i>
-                        <span class="hidden sm:inline">Announcements</span>
+                        <span class="hidden sm:inline">{{ __('ui.announcements') }}</span>
                         @if ($dashboardAnnouncementUnreadCount > 0)
                             <span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white">
                                 {{ $dashboardAnnouncementUnreadCount }}
@@ -346,25 +346,25 @@
                         <a href="{{ route('contents.ai-chat') }}"
                            class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap">
                             <i class="fas fa-comments text-cyan-600"></i>
-                            <span class="hidden sm:inline">AI Chat</span>
+                            <span class="hidden sm:inline">{{ __('ui.ai_chat') }}</span>
                         </a>
                         <a href="{{ route('contents.ai-insights') }}"
                            class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap">
                             <i class="fas fa-robot text-cyan-600"></i>
-                            <span class="hidden sm:inline">AI Insights</span>
+                            <span class="hidden sm:inline">{{ __('ui.ai_insights') }}</span>
                         </a>
                     @else
                         <a href="{{ route('plans') }}"
                            class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap">
                             <i class="fas fa-lock text-amber-600"></i>
-                            <span class="hidden sm:inline">Unlock AI</span>
+                            <span class="hidden sm:inline">{{ __('ui.unlock_ai') }}</span>
                         </a>
                     @endif
 
                     <a href="{{ route('plans') }}"
                        class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap">
                         <i class="fas fa-crown text-amber-500"></i>
-                        <span class="hidden sm:inline">{{ Auth::user()->isPro() ? 'Pro Active' : 'Upgrade' }}</span>
+                        <span class="hidden sm:inline">{{ Auth::user()->isPro() ? __('ui.pro_active') : __('ui.upgrade') }}</span>
                     </a>
                 </div>
             </div>
@@ -386,7 +386,7 @@
 
                     <div class="hidden sm:block text-left">
                         <div class="text-sm font-semibold text-slate-800 leading-tight">{{ Auth::user()->name }}</div>
-                        <div class="text-xs text-slate-500">My Account</div>
+                        <div class="text-xs text-slate-500">{{ __('ui.my_account') }}</div>
                     </div>
 
                     <i class="fas fa-chevron-down text-slate-600 text-xs"></i>
@@ -402,19 +402,19 @@
                     <a href="{{ route('profile.show') }}"
                        class="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-sky-50 transition">
                         <i class="far fa-user text-slate-600"></i>
-                        <span>Profile</span>
+                        <span>{{ __('ui.profile') }}</span>
                     </a>
 
                           <a href="{{ route('plans') }}"
                               class="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-sky-50 transition">
                                 <i class="fas fa-crown text-amber-500"></i>
-                                <span>Upgrade Plan</span>
+                                <span>{{ __('ui.upgrade_plan') }}</span>
                           </a>
 
                     <a href="{{ route('account.settings.edit') }}"
                        class="flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-sky-50 transition">
                         <i class="fas fa-gear text-slate-600"></i>
-                        <span>Settings</span>
+                        <span>{{ __('ui.settings') }}</span>
                     </a>
 
                     <form method="POST" action="{{ route('logout') }}">
@@ -422,7 +422,7 @@
                         <button type="submit"
                                 class="w-full text-left flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition">
                             <i class="fas fa-right-from-bracket"></i>
-                            <span>Logout</span>
+                            <span>{{ __('ui.logout') }}</span>
                         </button>
                     </form>
                 </div>
@@ -438,12 +438,12 @@
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="text-center md:text-left">
                         <h2 class="text-3xl md:text-4xl font-bold text-blue-900 mb-2">
-                            Welcome back,
+                            {{ __('ui.welcome_back') }}
                             <span class="bg-gradient-to-r from-cyan-700 to-blue-800 bg-clip-text text-transparent">
                                 {{ Auth::user()->name }}
                             </span>
                         </h2>
-                        <p class="text-blue-800/80">Real-time water intelligence at your fingertips</p>
+                        <p class="text-blue-800/80">{{ __('ui.water_intelligence') }}</p>
                     </div>
                 </div>
             </div>
@@ -453,17 +453,17 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <div class="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50 hover:bg-white/50 transition-all">
                 <i class="fas fa-tint text-cyan-600 text-2xl mb-2"></i>
-                <div class="text-sm text-blue-700">Current Flow</div>
+                <div class="text-sm text-blue-700">{{ __('ui.current_flow') }}</div>
                 <div class="text-xl font-bold text-blue-900" id="flow-rate">{{ number_format($dashboardFlowLpm, 3) }} L/min</div>
             </div>
             <div class="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50 hover:bg-white/50 transition-all">
                 <i class="fas fa-cloud-rain text-blue-600 text-2xl mb-2"></i>
-                <div class="text-sm text-blue-700">Rain Status</div>
+                <div class="text-sm text-blue-700">{{ __('ui.rain_status') }}</div>
                 <div class="text-xl font-bold text-blue-900" id="rainfall">{{ $dashboardRainLabel }}</div>
             </div>
             <div class="bg-white/40 backdrop-blur-sm rounded-xl p-4 text-center border border-white/50 hover:bg-white/50 transition-all">
                 <i class="fas fa-water text-teal-600 text-2xl mb-2"></i>
-                <div class="text-sm text-blue-700">Flood Level</div>
+                <div class="text-sm text-blue-700">{{ __('ui.flood_level') }}</div>
                 <div class="text-xl font-bold text-blue-900" id="flood-level">{{ $dashboardFloodCardState }}</div>
             </div>
         </div>
@@ -476,14 +476,14 @@
                 <div class="flex items-start justify-between mb-4">
                     <div class="text-5xl group-hover:scale-110 transition-transform duration-300">🌧️</div>
                     <div id="rain-state-badge" class="{{ $dashboardHasRecentRain ? 'bg-cyan-100/80 text-cyan-700' : 'bg-slate-100/80 text-slate-700' }} rounded-full px-3 py-1 text-xs">
-                        <i class="fas fa-chart-simple"></i> {{ $dashboardHasRecentRain ? 'Live' : 'No recent data' }}
+                        <i class="fas fa-chart-simple"></i> {{ $dashboardHasRecentRain ? __('ui.live') : __('ui.no_recent_data') }}
                     </div>
                 </div>
-                <h3 class="text-2xl font-bold text-blue-900 mb-2">Rain Display</h3>
+                <h3 class="text-2xl font-bold text-blue-900 mb-2">{{ __('ui.rain_display') }}</h3>
                 <p class="text-blue-700 mb-3">Real-time rainfall intensity and forecast data</p>
                 <div class="flex items-center gap-4 text-sm">
                     <span class="text-blue-600"><i class="fas fa-cloud-rain"></i> <span id="rain-trend">{{ $dashboardRainLabel }}</span></span>
-                    <span class="text-blue-600"><i class="fas fa-sliders"></i> Value: <span id="rain-forecast">{{ number_format($dashboardRainAnalog) }}</span></span>
+                    <span class="text-blue-600"><i class="fas fa-sliders"></i> {{ __('ui.value') }}: <span id="rain-forecast">{{ number_format($dashboardRainAnalog) }}</span></span>
                 </div>
                 <div class="mt-3 w-full bg-blue-200/50 rounded-full h-2">
                     <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-2 rounded-full" style="width: {{ $dashboardRainBarPercent }}%" id="rain-bar"></div>
@@ -495,10 +495,10 @@
                 <div class="flex items-start justify-between mb-4">
                     <div class="text-5xl group-hover:scale-110 transition-transform duration-300">🌊</div>
                     <div id="flood-state-badge" class="{{ $dashboardHasRecentFlood ? 'bg-blue-100/80 text-blue-700' : 'bg-slate-100/80 text-slate-700' }} rounded-full px-3 py-1 text-xs">
-                        <i class="fas fa-chart-line"></i> {{ $dashboardHasRecentFlood ? 'Live' : 'No recent data' }}
+                        <i class="fas fa-chart-line"></i> {{ $dashboardHasRecentFlood ? __('ui.live') : __('ui.no_recent_data') }}
                     </div>
                 </div>
-                <h3 class="text-2xl font-bold text-blue-900 mb-2">Flood Display</h3>
+                <h3 class="text-2xl font-bold text-blue-900 mb-2">{{ __('ui.flood_display') }}</h3>
                 <p class="text-blue-700 mb-3">Water level monitoring and flood warnings</p>
                 <div class="flex items-center gap-4 text-sm">
                     <span class="text-blue-600"><i class="fas fa-arrow-trend-up"></i> <span id="flood-trend">{{ $dashboardFloodCardState }}</span></span>
@@ -514,14 +514,14 @@
                 <div class="flex items-start justify-between mb-4">
                     <div class="text-5xl group-hover:scale-110 transition-transform duration-300">💧</div>
                     <div id="flow-state-badge" class="bg-emerald-100/80 rounded-full px-3 py-1 text-xs text-emerald-700">
-                        <i class="fas fa-tachometer-alt"></i> {{ $dashboardHasRecentFlow ? 'Live' : 'No recent data' }}
+                        <i class="fas fa-tachometer-alt"></i> {{ $dashboardHasRecentFlow ? __('ui.live') : __('ui.no_recent_data') }}
                     </div>
                 </div>
-                <h3 class="text-2xl font-bold text-blue-900 mb-2">Flow Display</h3>
+                <h3 class="text-2xl font-bold text-blue-900 mb-2">{{ __('ui.flow_display') }}</h3>
                 <p class="text-blue-700 mb-3">Water flow rate and volume tracking</p>
                 <div class="flex items-center gap-4 text-sm">
-                    <span class="text-blue-600"><i class="fas fa-water"></i> Rate: <span id="flow-rate-detail">{{ number_format($dashboardFlowLpm, 3) }} L/min</span></span>
-                    <span class="text-blue-600"><i class="fas fa-chart-line"></i> Daily: <span id="daily-volume">{{ number_format($dashboardDailyL, 2) }} L</span></span>
+                    <span class="text-blue-600"><i class="fas fa-water"></i> {{ __('ui.rate') }}: <span id="flow-rate-detail">{{ number_format($dashboardFlowLpm, 3) }} L/min</span></span>
+                    <span class="text-blue-600"><i class="fas fa-chart-line"></i> {{ __('ui.daily') }}: <span id="daily-volume">{{ number_format($dashboardDailyL, 2) }} L</span></span>
                 </div>
                 <div class="mt-3 w-full bg-blue-200/50 rounded-full h-2">
                     <div class="bg-gradient-to-r from-cyan-500 to-emerald-500 h-2 rounded-full" style="width: {{ $dashboardFlowBarPercent }}%" id="flow-bar"></div>
@@ -536,7 +536,7 @@
                         24h Trend
                     </div>
                 </div>
-                <h3 class="text-2xl font-bold text-blue-900 mb-2">Graph Display</h3>
+                <h3 class="text-2xl font-bold text-blue-900 mb-2">{{ __('ui.graph_display') }}</h3>
                 <p class="text-blue-700 mb-3">Real-time flow, rain, and flood visualization</p>
                 <div class="chart-container">
                     <canvas id="waterChart" width="400" height="200" style="max-height: 180px; width: 100%"></canvas>
@@ -551,23 +551,23 @@
         <div class="grid grid-cols-5 gap-1 px-2 py-2 text-[11px] font-semibold text-blue-900">
             <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 bg-sky-100/80">
                 <i class="fas fa-house text-sm"></i>
-                <span>Home</span>
+                <span>{{ __('ui.home') }}</span>
             </a>
             <a href="{{ route('contents.rain-display') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
                 <i class="fas fa-cloud-rain text-sm"></i>
-                <span>Rain</span>
+                <span>{{ __('ui.rain') }}</span>
             </a>
             <a href="{{ route('contents.flood-display') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
                 <i class="fas fa-water text-sm"></i>
-                <span>Flood</span>
+                <span>{{ __('ui.flood') }}</span>
             </a>
             <a href="{{ route('contents.flow-display') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
                 <i class="fas fa-tint text-sm"></i>
-                <span>Flow</span>
+                <span>{{ __('ui.flow') }}</span>
             </a>
             <a href="{{ route('contents.announcements') }}" class="relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
                 <i class="fas fa-bullhorn text-sm"></i>
-                <span>News</span>
+                <span>{{ __('ui.news') }}</span>
                 @if ($dashboardAnnouncementUnreadCount > 0)
                     <span class="absolute top-0 right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
                         {{ $dashboardAnnouncementUnreadCount }}
@@ -654,6 +654,14 @@
         const flowDataUrl = @json(route('contents.flow-display.data'));
         const rainDataUrl = @json(route('contents.rain-display.data'));
         const floodDataUrl = @json(route('contents.flood-display.data'));
+        const i18nLive = @json(__('ui.live'));
+        const i18nNoRecentData = @json(__('ui.no_recent_data'));
+        const i18nHeavyRain = @json(__('ui.heavy_rain'));
+        const i18nRain = @json(__('ui.rain'));
+        const i18nNoRain = @json(__('ui.no_rain'));
+        const i18nFlashFloodWarning = @json(__('ui.flash_flood_warning'));
+        const i18nNormalRise = @json(__('ui.normal_rise'));
+        const i18nSafeDry = @json(__('ui.safe_dry'));
 
         let flowRate = Number(@json($dashboardFlowLpm));
         let rainStatusText = @json($dashboardRainLabel);
@@ -749,10 +757,10 @@
 
                     if (flowActiveSensors > 0) {
                         flowStateBadgeEl.className = 'bg-emerald-100/80 rounded-full px-3 py-1 text-xs text-emerald-700';
-                        flowStateBadgeEl.innerHTML = `<i class="fas fa-tachometer-alt"></i> Live (${flowActiveSensors}/${sensors.length || 2})`;
+                        flowStateBadgeEl.innerHTML = `<i class="fas fa-tachometer-alt"></i> ${i18nLive} (${flowActiveSensors}/${sensors.length || 2})`;
                     } else {
                         flowStateBadgeEl.className = 'bg-slate-100/80 rounded-full px-3 py-1 text-xs text-slate-700';
-                        flowStateBadgeEl.innerHTML = '<i class="fas fa-tachometer-alt"></i> No recent data';
+                        flowStateBadgeEl.innerHTML = `<i class="fas fa-tachometer-alt"></i> ${i18nNoRecentData}`;
                     }
                 }
 
@@ -768,9 +776,9 @@
         }
 
         function getRainLabel(level) {
-            if (level === 'heavy_rain') return 'Heavy Rain';
-            if (level === 'rain') return 'Rain';
-            return 'No Rain';
+            if (level === 'heavy_rain') return i18nHeavyRain;
+            if (level === 'rain') return i18nRain;
+            return i18nNoRain;
         }
 
         async function refreshRainSummary() {
@@ -805,10 +813,10 @@
                 if (rainStateBadgeEl) {
                     if (latest?.is_recent) {
                         rainStateBadgeEl.className = 'bg-cyan-100/80 rounded-full px-3 py-1 text-xs text-cyan-700';
-                        rainStateBadgeEl.innerHTML = '<i class="fas fa-chart-simple"></i> Live';
+                        rainStateBadgeEl.innerHTML = `<i class="fas fa-chart-simple"></i> ${i18nLive}`;
                     } else {
                         rainStateBadgeEl.className = 'bg-slate-100/80 rounded-full px-3 py-1 text-xs text-slate-700';
-                        rainStateBadgeEl.innerHTML = '<i class="fas fa-chart-simple"></i> No recent data';
+                        rainStateBadgeEl.innerHTML = `<i class="fas fa-chart-simple"></i> ${i18nNoRecentData}`;
                     }
                 }
             } catch {
@@ -818,10 +826,10 @@
 
         function floodStatusLabel(status) {
             if (status === 'CRITICAL') return 'Critical';
-            if (status === 'FLASH FLOOD WARNING') return 'Flash Flood Warning';
-            if (status === 'NORMAL RISE') return 'Normal Rise';
-            if (status === 'LEVEL 1 DETECTED') return 'Level 1 Detected';
-            return 'Safe / Dry';
+            if (status === 'FLASH FLOOD WARNING') return i18nFlashFloodWarning;
+            if (status === 'NORMAL RISE') return i18nNormalRise;
+            if (status === 'LEVEL 1 DETECTED') return @json(__('ui.water_rising'));
+            return i18nSafeDry;
         }
 
         function floodBarPercent(status) {
@@ -865,10 +873,10 @@
                 if (floodStateBadgeEl) {
                     if (latest?.is_recent) {
                         floodStateBadgeEl.className = 'bg-blue-100/80 rounded-full px-3 py-1 text-xs text-blue-700';
-                        floodStateBadgeEl.innerHTML = '<i class="fas fa-chart-line"></i> Live';
+                        floodStateBadgeEl.innerHTML = `<i class="fas fa-chart-line"></i> ${i18nLive}`;
                     } else {
                         floodStateBadgeEl.className = 'bg-slate-100/80 rounded-full px-3 py-1 text-xs text-slate-700';
-                        floodStateBadgeEl.innerHTML = '<i class="fas fa-chart-line"></i> No recent data';
+                        floodStateBadgeEl.innerHTML = `<i class="fas fa-chart-line"></i> ${i18nNoRecentData}`;
                     }
                 }
             } catch {

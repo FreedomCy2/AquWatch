@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,14 +76,14 @@
         <section class="glass-card rounded-3xl p-5 md:p-7 shadow-xl card-enter">
             <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div>
-                    <p class="text-xs uppercase tracking-widest text-blue-800/75">Community Center</p>
-                    <h1 class="text-3xl md:text-4xl font-black text-cyan-950 leading-tight mt-1">Announcements</h1>
+                    <p class="text-xs uppercase tracking-widest text-blue-800/75">{{ __('ui.community_center') }}</p>
+                    <h1 class="text-3xl md:text-4xl font-black text-cyan-950 leading-tight mt-1">{{ __('ui.announcements') }}</h1>
                     <p class="text-cyan-900/80 mt-2 max-w-2xl">Stay updated with important messages from admins and recent account notifications in one clean timeline.</p>
                 </div>
 
                 <a href="{{ route('dashboard') }}" class="inline-flex w-fit max-w-full items-center gap-2 px-4 py-2 rounded-xl bg-cyan-700 text-white hover:bg-cyan-800 transition font-semibold break-words">
                     <i class="fas fa-house"></i>
-                    <span>Back to Dashboard</span>
+                    <span>{{ __('ui.back_to_dashboard') }}</span>
                 </a>
             </div>
         </section>
@@ -95,15 +95,15 @@
 
         <section class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="glass-card rounded-2xl p-4 shadow-lg card-enter">
-                <p class="text-xs uppercase tracking-wide text-cyan-900/70">Active Announcements</p>
+                <p class="text-xs uppercase tracking-wide text-cyan-900/70">{{ __('ui.active_announcements') }}</p>
                 <p class="text-3xl font-black text-cyan-950 mt-1">{{ number_format($announcements->count()) }}</p>
-                <p class="text-sm text-cyan-900/75 mt-1">Published by admin</p>
+                <p class="text-sm text-cyan-900/75 mt-1">{{ __('ui.published_by_admin') }}</p>
             </div>
 
             <div class="glass-card rounded-2xl p-4 shadow-lg card-enter" style="animation-delay: 0.08s;">
-                <p class="text-xs uppercase tracking-wide text-cyan-900/70">Admin Notifications</p>
+                <p class="text-xs uppercase tracking-wide text-cyan-900/70">{{ __('ui.admin_notifications') }}</p>
                 <p class="text-3xl font-black text-cyan-950 mt-1">{{ number_format($notifications->count()) }}</p>
-                <p class="text-sm text-cyan-900/75 mt-1">Direct user updates</p>
+                <p class="text-sm text-cyan-900/75 mt-1">{{ __('ui.direct_user_updates') }}</p>
             </div>
         </section>
 
@@ -113,7 +113,7 @@
                     <i class="fas fa-bullhorn"></i>
                 </span>
                 <div>
-                    <h2 class="text-xl md:text-2xl font-bold text-cyan-950">Announcements</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-cyan-950">{{ __('ui.announcements') }}</h2>
                     <p class="text-sm text-cyan-900/75">Official posts and updates from admin</p>
                 </div>
             </div>
@@ -143,7 +143,7 @@
                     <i class="fas fa-bell"></i>
                 </span>
                 <div>
-                    <h2 class="text-xl md:text-2xl font-bold text-cyan-950">My Notifications</h2>
+                    <h2 class="text-xl md:text-2xl font-bold text-cyan-950">{{ __('ui.my_notifications') }}</h2>
                     <p class="text-sm text-cyan-900/75">Messages sent by admin to you</p>
                 </div>
             </div>
@@ -187,7 +187,7 @@
                             aria-expanded="false"
                             aria-controls="hidden-notifications"
                         >
-                            <span>Show more</span>
+                            <span>{{ __('ui.show_more') }}</span>
                             <i class="fas fa-chevron-down text-xs"></i>
                         </button>
                     </div>
@@ -219,7 +219,7 @@
 
                 toggleButton.setAttribute('aria-expanded', String(!isHidden));
                 if (label) {
-                    label.textContent = isHidden ? 'Show more' : 'Show less';
+                    label.textContent = isHidden ? @json(__('ui.show_more')) : @json(__('ui.show_less'));
                 }
                 if (icon) {
                     icon.className = isHidden ? 'fas fa-chevron-down text-xs' : 'fas fa-chevron-up text-xs';
