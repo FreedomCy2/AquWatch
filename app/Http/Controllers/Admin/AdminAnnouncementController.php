@@ -4,26 +4,37 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Models\UserNotification;
+use App\Services\FirebaseMessagingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AdminAnnouncementController extends Controller
 {
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, FirebaseMessagingService $firebaseMessaging): RedirectResponse
     {
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:5000'],
         ]);
 
-        Announcement::query()->create([
+        $announcement = Announcement::query()->create([
             'title' => $validated['title'],
             'body' => $validated['body'],
             'created_by' => (int) auth()->id(),
             'is_active' => true,
             'published_at' => now(),
         ]);
+
+        $notification = UserNotification::query()->create([
+            'user_id' => null,
+            'title' => $announcement->title,
+            'message' => $announcement->body,
+            'sent_by' => (int) auth()->id(),
+        ]);
+
+        $firebaseMessaging->sendUserNotification($notification);
 
         return redirect()->route('admin.dashboard')->with('success', 'Announcement published.');
     }
