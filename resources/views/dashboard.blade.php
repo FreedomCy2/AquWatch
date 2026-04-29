@@ -943,6 +943,18 @@
             if (!response.ok) {
                 throw new Error('Failed to save FCM token.');
             }
+
+            const contentType = response.headers.get('content-type') || '';
+            if (!contentType.includes('application/json')) {
+                throw new Error('Unexpected response while saving FCM token.');
+            }
+
+            const payload = await response.json();
+            if (!payload?.id) {
+                throw new Error('Missing token id in response.');
+            }
+
+            return payload;
         }
 
         async function setupFirebaseWebPush() {

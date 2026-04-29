@@ -256,6 +256,18 @@
         if (!response.ok) {
             throw new Error('Failed to save FCM token.');
         }
+
+        const contentType = response.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+            throw new Error('Unexpected response while saving FCM token.');
+        }
+
+        const payload = await response.json();
+        if (!payload?.id) {
+            throw new Error('Missing token id in response.');
+        }
+
+        return payload;
     }
 
     function setPermissionStatus(message, tone = 'default') {
@@ -320,8 +332,14 @@
                 return;
             }
 
-            await saveFcmToken(token);
-            setPermissionStatus(i18nPermissionGranted, 'success');
+            const saved = await saveFcmToken(token);
+            setPermissionStatus(`${i18nPermissionGranted} (${String(token).slice(-8)})`, 'success');
+            window.dispatchEvent(new CustomEvent('fcm-token-updated', {
+                detail: {
+                    token,
+                    id: saved.id,
+                },
+            }));
         } catch (error) {
             console.warn('Manual FCM permission/token setup failed:', error);
             setPermissionStatus(i18nPermissionSaveFailed, 'error');
