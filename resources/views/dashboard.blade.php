@@ -1021,9 +1021,22 @@
             }
         }
 
-        window.addEventListener('load', () => {
-            setupFirebaseWebPush();
-        });
+function isAquWatchApp() {
+    return navigator.userAgent.includes('AquWatchApp/1.0');
+}
+
+window.addEventListener('load', () => {
+
+    if (isAquWatchApp()) {
+        console.log("Running inside Android App");
+
+        // 🚫 STOP web push completely
+        return;
+    }
+
+    // ✅ Only browser runs this
+    setupFirebaseWebPush();
+});
 
         // ========== RIPPLE EFFECT ==========
         document.querySelectorAll('.ripple-btn, .dashboard-card, button').forEach(btn => {
