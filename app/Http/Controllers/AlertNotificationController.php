@@ -71,7 +71,7 @@ class AlertNotificationController extends Controller
 
         $floodSeverity = [
             'CRITICAL' => 'critical',
-            'FLASH FLOOD WARNING' => 'critical',
+            'FLASH FLOOD WARNING' => 'warning',
             'NORMAL RISE' => 'warning',
             'LEVEL 1 DETECTED' => 'warning',
         ];
@@ -136,12 +136,10 @@ class AlertNotificationController extends Controller
                 }
 
                 if ($level !== $previousLevel && $this->shouldTriggerRainAlert($level, $rainTrigger)) {
-                    $isHeavy = $level === 'heavy_rain';
-
                     $alerts->push([
                         'source' => 'rain',
-                        'severity' => $isHeavy ? 'critical' : 'warning',
-                        'title' => $isHeavy ? 'Heavy rain detected' : 'Rain detected',
+                        'severity' => 'warning',
+                        'title' => $level === 'heavy_rain' ? 'Heavy rain detected' : 'Rain detected',
                         'message' => sprintf(
                             '%s reported %s (value: %s).',
                             (string) $reading->sensor_id,
@@ -180,12 +178,16 @@ class AlertNotificationController extends Controller
                 $changePercent = abs(($currentFlow - $previousFlow) / $denominator) * 100;
 
                 if ($changePercent >= $flowAnomalyPercent) {
+                    $isLowFlowDrop = $currentFlow < $previousFlow;
+
                     $alerts->push([
                         'source' => 'flow',
-                        'severity' => $changePercent >= ($flowAnomalyPercent * 2) ? 'critical' : 'warning',
-                        'title' => 'Flow anomaly detected',
+                        'severity' => $isLowFlowDrop ? 'critical' : 'warning',
+                        'title' => $isLowFlowDrop ? 'Possible leakage detected' : 'Flow anomaly detected',
                         'message' => sprintf(
-                            '%s changed by %.1f%% (from %.2f to %.2f L/min, threshold: %d%%).',
+                            $isLowFlowDrop
+                                ? '%s flow dropped by %.1f%% (from %.2f to %.2f L/min, threshold: %d%%).'
+                                : '%s changed by %.1f%% (from %.2f to %.2f L/min, threshold: %d%%).',
                             (string) $reading->sensor_id,
                             $changePercent,
                             $previousFlow,
