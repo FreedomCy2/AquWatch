@@ -990,10 +990,15 @@
                     return;
                 }
 
-                await saveFcmToken(token);
-            } catch (error) {
-                console.warn('FCM setup skipped:', error);
-            }
+function isAquWatchApp() {
+    return navigator.userAgent.includes('AquWatchApp/1.0');
+}
+
+window.addEventListener('load', () => {
+    if (!isAquWatchApp()) {
+        setupFirebaseWebPush();
+    }
+});
         }
 
         window.addEventListener('load', () => {
