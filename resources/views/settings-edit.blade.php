@@ -167,6 +167,22 @@
                     </div>
                 </div>
 
+                <div class="mt-7 rounded-2xl border border-blue-200 bg-blue-50/70 p-4 md:p-5">
+                    <h2 class="text-lg font-bold text-blue-900 mb-1">{{ __('ui.push_notifications') }}</h2>
+                    <p class="text-sm text-blue-800/90 mb-4">{{ __('ui.push_notifications_help') }}</p>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button
+                            type="button"
+                            id="resend-notification-permission"
+                            class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold shadow hover:scale-[1.02] transition"
+                        >
+                            {{ __('ui.enable_notifications_again') }}
+                        </button>
+                        <span id="notification-permission-status" class="text-sm text-blue-900/90"></span>
+                    </div>
+                </div>
+
                 <div class="mt-8 flex justify-end">
                     <button type="submit"
                             class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold shadow-lg hover:scale-[1.02] transition">
@@ -184,5 +200,137 @@
         © {{ date('Y') }} AquWatch — Protecting our waters with real-time intelligence
     </p>
 </footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-messaging-compat.js"></script>
+<script>
+    const resendPermissionButton = document.getElementById('resend-notification-permission');
+    const permissionStatusEl = document.getElementById('notification-permission-status');
+
+    const fcmTokenSaveUrl = @json(route('fcm-token.store'));
+    const csrfToken = @json(csrf_token());
+    const firebaseConfig = {
+        apiKey: @json(config('services.firebase.web_api_key')),
+        authDomain: @json(config('services.firebase.web_auth_domain')),
+        projectId: @json(config('services.firebase.web_project_id')),
+        storageBucket: @json(config('services.firebase.web_storage_bucket')),
+        messagingSenderId: @json(config('services.firebase.web_messaging_sender_id')),
+        appId: @json(config('services.firebase.web_app_id')),
+        measurementId: @json(config('services.firebase.web_measurement_id')),
+    };
+    const firebaseVapidKey = @json(config('services.firebase.web_vapid_key'));
+
+    const i18nPermissionGranted = @json(__('ui.permission_granted_token_saved'));
+    const i18nPermissionDenied = @json(__('ui.permission_denied_browser_settings'));
+    const i18nPermissionDismissed = @json(__('ui.permission_not_granted'));
+    const i18nPermissionUnsupported = @json(__('ui.permission_unsupported'));
+    const i18nPermissionProcessing = @json(__('ui.permission_requesting'));
+    const i18nPermissionSaveFailed = @json(__('ui.permission_save_failed'));
+    const i18nMissingFirebaseConfig = @json(__('ui.permission_missing_firebase'));
+
+    function hasFirebaseWebConfig(config) {
+        return Boolean(
+            config.apiKey &&
+            config.authDomain &&
+            config.projectId &&
+            config.storageBucket &&
+            config.messagingSenderId &&
+            config.appId
+        );
+    }
+
+    async function saveFcmToken(token) {
+        const response = await fetch(fcmTokenSaveUrl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                token,
+                platform: 'web',
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save FCM token.');
+        }
+    }
+
+    function setPermissionStatus(message, tone = 'default') {
+        permissionStatusEl.textContent = message;
+        permissionStatusEl.className = 'text-sm';
+
+        if (tone === 'success') {
+            permissionStatusEl.classList.add('text-emerald-700', 'font-medium');
+            return;
+        }
+
+        if (tone === 'error') {
+            permissionStatusEl.classList.add('text-red-700', 'font-medium');
+            return;
+        }
+
+        permissionStatusEl.classList.add('text-blue-900', 'opacity-90');
+    }
+
+    async function resendNotificationPermission() {
+        if (!window.isSecureContext || !('Notification' in window) || !('serviceWorker' in navigator)) {
+            setPermissionStatus(i18nPermissionUnsupported, 'error');
+            return;
+        }
+
+        if (!hasFirebaseWebConfig(firebaseConfig) || !firebaseVapidKey || !window.firebase?.apps) {
+            setPermissionStatus(i18nMissingFirebaseConfig, 'error');
+            return;
+        }
+
+        if (Notification.permission === 'denied') {
+            setPermissionStatus(i18nPermissionDenied, 'error');
+            return;
+        }
+
+        resendPermissionButton.disabled = true;
+        setPermissionStatus(i18nPermissionProcessing);
+
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+
+            const permission = Notification.permission === 'default'
+                ? await Notification.requestPermission()
+                : Notification.permission;
+
+            if (permission !== 'granted') {
+                setPermissionStatus(i18nPermissionDismissed, 'error');
+                return;
+            }
+
+            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            const messaging = firebase.messaging();
+            const token = await messaging.getToken({
+                vapidKey: firebaseVapidKey,
+                serviceWorkerRegistration: registration,
+            });
+
+            if (!token) {
+                setPermissionStatus(i18nPermissionSaveFailed, 'error');
+                return;
+            }
+
+            await saveFcmToken(token);
+            setPermissionStatus(i18nPermissionGranted, 'success');
+        } catch (error) {
+            console.warn('Manual FCM permission/token setup failed:', error);
+            setPermissionStatus(i18nPermissionSaveFailed, 'error');
+        } finally {
+            resendPermissionButton.disabled = false;
+        }
+    }
+
+    resendPermissionButton?.addEventListener('click', resendNotificationPermission);
+</script>
 </body>
 </html>
