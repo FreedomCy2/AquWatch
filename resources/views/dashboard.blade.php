@@ -112,7 +112,7 @@
         ->take(4)
         ->values();
 
-    $dashboardRecentAlertCount = UserNotification::query()
+    $dashboardAnnouncementUnreadCount = UserNotification::query()
         ->whereNull('read_at')
         ->where(function ($query): void {
             $query->whereNull('user_id')
@@ -328,18 +328,18 @@
                        title="Notifications">
                         <i class="fas fa-bell text-amber-600"></i>
                         <span class="hidden sm:inline">Notifications</span>
-                        @if ($dashboardRecentAlertCount > 0)
-                            <span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white">
-                                {{ $dashboardRecentAlertCount }}
-                            </span>
-                        @endif
                     </a>
 
                     <a href="{{ route('contents.announcements') }}"
-                       class="flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap"
+                       class="relative flex items-center gap-2 bg-white/80 hover:bg-white px-3 md:px-4 py-2 rounded-xl shadow border border-white/70 text-blue-800 font-semibold transition whitespace-nowrap"
                        title="Announcements">
                         <i class="fas fa-bullhorn text-orange-500"></i>
                         <span class="hidden sm:inline">Announcements</span>
+                        @if ($dashboardAnnouncementUnreadCount > 0)
+                            <span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center ring-2 ring-white">
+                                {{ $dashboardAnnouncementUnreadCount }}
+                            </span>
+                        @endif
                     </a>
 
                     @if (Auth::user()->isPro())
@@ -565,9 +565,14 @@
                 <i class="fas fa-tint text-sm"></i>
                 <span>Flow</span>
             </a>
-            <a href="{{ route('contents.announcements') }}" class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
+            <a href="{{ route('contents.announcements') }}" class="relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 hover:bg-sky-100/70 transition">
                 <i class="fas fa-bullhorn text-sm"></i>
                 <span>News</span>
+                @if ($dashboardAnnouncementUnreadCount > 0)
+                    <span class="absolute top-0 right-2 min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
+                        {{ $dashboardAnnouncementUnreadCount }}
+                    </span>
+                @endif
             </a>
         </div>
     </nav>
