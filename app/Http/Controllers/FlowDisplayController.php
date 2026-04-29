@@ -38,7 +38,7 @@ class FlowDisplayController extends Controller
     private function buildPayload(): array
     {
         $now = now();
-        $liveCutoff = $now->copy()->subMinutes(2);
+        $liveCutoff = $now->copy()->subSeconds(30);
 
         $latestPerSensor = FlowReading::query()
             ->select(['sensor_id', 'flow_lpm', 'total_ml', 'created_at'])

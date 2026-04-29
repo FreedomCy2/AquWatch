@@ -200,7 +200,7 @@ class AlertNotificationController extends Controller
             }
         }
 
-        $offlineCutoff = now()->subMinutes(2);
+        $offlineCutoff = now()->subSeconds(30);
 
         $offlineSensors = Sensor::query()
             ->select(['sensor_id', 'sensor_type', 'last_seen_at'])

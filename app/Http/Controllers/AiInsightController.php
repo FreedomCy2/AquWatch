@@ -43,7 +43,7 @@ class AiInsightController extends Controller
 
         $onlineSensors = Sensor::query()
             ->where('is_active', true)
-            ->where('last_seen_at', '>=', $now->copy()->subMinutes(2))
+            ->where('last_seen_at', '>=', $now->copy()->subSeconds(30))
             ->count();
 
         $floodStatus = (string) ($latestFlood?->status ?? 'SAFE / DRY');

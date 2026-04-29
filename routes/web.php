@@ -25,7 +25,7 @@ Route::get('/', function () {
         $totalSensors = Sensor::query()->where('is_active', true)->count();
         $onlineSensors = Sensor::query()
                 ->where('is_active', true)
-                ->where('last_seen_at', '>=', now()->subMinutes(2))
+        ->where('last_seen_at', '>=', now()->subSeconds(30))
                 ->count();
 
         $allSensorsOnline = $totalSensors > 0 && $onlineSensors === $totalSensors;
@@ -41,7 +41,7 @@ Route::get('/', function () {
             $totalSensors = Sensor::query()->where('is_active', true)->count();
             $onlineSensors = Sensor::query()
                 ->where('is_active', true)
-                ->where('last_seen_at', '>=', now()->subMinutes(2))
+                ->where('last_seen_at', '>=', now()->subSeconds(30))
                 ->count();
 
             return response()->json([

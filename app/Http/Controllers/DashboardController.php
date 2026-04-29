@@ -57,7 +57,7 @@ class DashboardController extends Controller
         $totalSensors = Sensor::query()->where('is_active', true)->count();
         $activeSensors = Sensor::query()
             ->where('is_active', true)
-            ->where('last_seen_at', '>=', now()->subMinutes(2))
+            ->where('last_seen_at', '>=', now()->subSeconds(30))
             ->count();
 
         $userSearch = trim((string) $request->query('email', ''));
