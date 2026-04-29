@@ -10,8 +10,8 @@
 const int SENSOR_PIN = 34;
 
 // Wi-Fi credentials
-const char* WIFI_SSID = "Freedom";
-const char* WIFI_PASSWORD = "aaaaaaaa";
+const char* WIFI_SSID = "DecoA";
+const char* WIFI_PASSWORD = "315321TKB";
 
 // Laravel API settings
 const char* API_URL = "https://aquwatch.org/api/ingest/rain";
