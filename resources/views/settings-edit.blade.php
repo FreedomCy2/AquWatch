@@ -350,5 +350,37 @@
 
     resendPermissionButton?.addEventListener('click', resendNotificationPermission);
 </script>
+
+@auth
+<script>
+(function () {
+    if (window.AndroidBridge && typeof window.AndroidBridge.getFcmToken === 'function') {
+        try {
+            var token = window.AndroidBridge.getFcmToken();
+            if (token && token.length > 0) {
+                fetch('/api/save-device-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        user_id: {{ auth()->id() }}
+                    })
+                }).then(function (r) {
+                    console.log('[AquWatch] Device token linked, status:', r.status);
+                }).catch(function (e) {
+                    console.warn('[AquWatch] Link device token failed:', e);
+                });
+            }
+        } catch (e) {
+            console.warn('[AquWatch] AndroidBridge error:', e);
+        }
+    }
+})();
+</script>
+@endauth
+
 </body>
 </html>
