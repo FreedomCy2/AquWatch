@@ -990,15 +990,10 @@
                     return;
                 }
 
-function isAquWatchApp() {
-    return navigator.userAgent.includes('AquWatchApp/1.0');
-}
-
-window.addEventListener('load', () => {
-    if (!isAquWatchApp()) {
-        setupFirebaseWebPush();
-    }
-});
+                await saveFcmToken(token);
+            } catch (error) {
+                console.warn('FCM setup skipped:', error);
+            }
         }
 
         window.addEventListener('load', () => {
