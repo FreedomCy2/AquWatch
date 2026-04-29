@@ -88,6 +88,11 @@
             </div>
         </section>
 
+        @php
+            $visibleNotifications = $notifications->take(4);
+            $hiddenNotifications = $notifications->slice(4)->values();
+        @endphp
+
         <section class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="glass-card rounded-2xl p-4 shadow-lg card-enter">
                 <p class="text-xs uppercase tracking-wide text-cyan-900/70">Active Announcements</p>
@@ -144,7 +149,7 @@
             </div>
 
             <div class="space-y-3">
-                @forelse ($notifications as $notification)
+                @forelse ($visibleNotifications as $notification)
                     <article class="rounded-2xl border border-white/70 bg-white/75 p-4 md:p-5 shadow-sm hover:shadow-md hover:bg-white/85 transition">
                         <div class="flex items-start justify-between gap-3">
                             <h3 class="text-lg font-bold text-slate-900 leading-tight">{{ $notification->title }}</h3>
@@ -159,6 +164,34 @@
                         No notifications from admin yet.
                     </div>
                 @endforelse
+
+                @if ($hiddenNotifications->isNotEmpty())
+                    <div id="hidden-notifications" class="hidden space-y-3 pt-1">
+                        @foreach ($hiddenNotifications as $notification)
+                            <article class="rounded-2xl border border-white/70 bg-white/65 p-4 md:p-5 shadow-sm hover:shadow-md hover:bg-white/85 transition">
+                                <div class="flex items-start justify-between gap-3">
+                                    <h3 class="text-lg font-bold text-slate-900 leading-tight">{{ $notification->title }}</h3>
+                                    <span class="shrink-0 rounded-full bg-cyan-100 text-cyan-800 text-[11px] font-semibold px-2 py-1">NOTICE</span>
+                                </div>
+                                <p class="text-sm md:text-[15px] text-slate-700 mt-2 leading-relaxed">{{ $notification->message }}</p>
+                                <p class="text-xs text-slate-500 mt-3">Sent {{ $notification->created_at?->diffForHumans() }}</p>
+                            </article>
+                        @endforeach
+                    </div>
+
+                    <div class="pt-2">
+                        <button
+                            type="button"
+                            id="toggle-notifications"
+                            class="inline-flex items-center gap-2 rounded-xl bg-white/80 px-4 py-2 text-cyan-900 font-semibold hover:bg-white transition"
+                            aria-expanded="false"
+                            aria-controls="hidden-notifications"
+                        >
+                            <span>Show more</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                    </div>
+                @endif
             </div>
         </section>
     </main>
@@ -175,6 +208,25 @@
     </footer>
 
     <script>
+        const toggleButton = document.getElementById('toggle-notifications');
+        const hiddenNotifications = document.getElementById('hidden-notifications');
+
+        if (toggleButton && hiddenNotifications) {
+            toggleButton.addEventListener('click', () => {
+                const isHidden = hiddenNotifications.classList.toggle('hidden');
+                const label = toggleButton.querySelector('span');
+                const icon = toggleButton.querySelector('i');
+
+                toggleButton.setAttribute('aria-expanded', String(!isHidden));
+                if (label) {
+                    label.textContent = isHidden ? 'Show more' : 'Show less';
+                }
+                if (icon) {
+                    icon.className = isHidden ? 'fas fa-chevron-down text-xs' : 'fas fa-chevron-up text-xs';
+                }
+            });
+        }
+
         function createBubble() {
             const container = document.getElementById('bubble-container');
             if (!container) return;

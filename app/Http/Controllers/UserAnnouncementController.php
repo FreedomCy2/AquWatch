@@ -11,6 +11,7 @@ class UserAnnouncementController extends Controller
     public function index(): View
     {
         $user = auth()->user();
+        $recentNotificationCutoff = now()->subDay();
 
         $announcements = Announcement::query()
             ->where('is_active', true)
@@ -23,6 +24,7 @@ class UserAnnouncementController extends Controller
                 $query->whereNull('user_id')
                     ->orWhere('user_id', $user->id);
             })
+            ->where('created_at', '>=', $recentNotificationCutoff)
             ->latest()
             ->get();
 
