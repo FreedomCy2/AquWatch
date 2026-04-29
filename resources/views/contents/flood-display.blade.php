@@ -98,23 +98,7 @@
                 </div>
             </div>
 
-            <div class="glass-card rounded-3xl p-4 md:p-6 shadow-xl">
-                <h2 class="text-xl font-bold text-cyan-950 mb-3">Sensor States</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="rounded-xl bg-white/60 p-4 border border-white/60">
-                        <p class="text-sm text-cyan-900/70">Level Sensor 1</p>
-                        <p id="s1-state" class="text-xl font-bold text-cyan-950">Dry</p>
-                    </div>
-                    <div class="rounded-xl bg-white/60 p-4 border border-white/60">
-                        <p class="text-sm text-cyan-900/70">Level Sensor 2</p>
-                        <p id="s2-state" class="text-xl font-bold text-cyan-950">Dry</p>
-                    </div>
-                    <div class="rounded-xl bg-white/60 p-4 border border-white/60">
-                        <p class="text-sm text-cyan-900/70">Level Sensor 3</p>
-                        <p id="s3-state" class="text-xl font-bold text-cyan-950">Dry</p>
-                    </div>
-                </div>
-            </div>
+            <!-- Sensor states moved to Admin dashboard (admins only) -->
 
             <div class="glass-card rounded-3xl p-4 md:p-6 shadow-xl">
                 <h2 class="text-xl font-bold text-cyan-950 mb-3">More Details</h2>

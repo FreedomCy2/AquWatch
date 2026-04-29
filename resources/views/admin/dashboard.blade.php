@@ -55,6 +55,27 @@
         </section>
 
         <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white/65 rounded-2xl p-5 border border-white shadow">
+                <p class="text-sm text-blue-700">Flood Sensor States (Admin)</p>
+                <div class="mt-3 grid grid-cols-1 gap-2">
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Level Sensor 1</span>
+                        <span id="admin-s1-state" class="font-semibold text-slate-700">-</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Level Sensor 2</span>
+                        <span id="admin-s2-state" class="font-semibold text-slate-700">-</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span>Level Sensor 3</span>
+                        <span id="admin-s3-state" class="font-semibold text-slate-700">-</span>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-3">Visible to administrators only.</p>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <a href="{{ route('contents.rain-display') }}" class="bg-white/65 rounded-2xl p-5 border border-white shadow hover:bg-white/80 transition block">
                 <p class="text-sm text-blue-700"><i class="fas fa-cloud-rain mr-1"></i> Rain Display</p>
                 <p id="admin-rain-status" class="text-2xl font-bold text-blue-900">{{ $latestRainLabel }}</p>
@@ -329,6 +350,31 @@
             statusEl.textContent = floodLabel(status);
             const recency = latest.is_recent ? 'Live' : 'Stale';
             metaEl.textContent = `Sensor: ${latest.sensor_id ?? '-'} | Rise: ${Number(latest.rise_time_sec ?? 0)}s | ${recency}`;
+
+            // Update admin flood sensor wet/dry states if provided
+            try {
+                const s1El = document.getElementById('admin-s1-state');
+                const s2El = document.getElementById('admin-s2-state');
+                const s3El = document.getElementById('admin-s3-state');
+
+                if (s1El) {
+                    const s1Wet = Boolean(latest?.s1_wet);
+                    s1El.textContent = s1Wet ? 'Wet' : 'Dry';
+                    s1El.className = s1Wet ? 'font-semibold text-rose-600' : 'font-semibold text-slate-700';
+                }
+                if (s2El) {
+                    const s2Wet = Boolean(latest?.s2_wet);
+                    s2El.textContent = s2Wet ? 'Wet' : 'Dry';
+                    s2El.className = s2Wet ? 'font-semibold text-rose-600' : 'font-semibold text-slate-700';
+                }
+                if (s3El) {
+                    const s3Wet = Boolean(latest?.s3_wet);
+                    s3El.textContent = s3Wet ? 'Wet' : 'Dry';
+                    s3El.className = s3Wet ? 'font-semibold text-rose-600' : 'font-semibold text-slate-700';
+                }
+            } catch (e) {
+                // ignore DOM errors
+            }
         }
 
         function updateAdminFlowCard(payload) {
