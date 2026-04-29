@@ -27,6 +27,13 @@ class AdminNotificationController extends Controller
             'sent_by' => (int) auth()->id(),
         ]);
 
+        if (($validated['user_id'] ?? null) === null) {
+            return redirect()->route('admin.dashboard')->with(
+                'success',
+                'Notification saved for all users. Push notification skipped for broadcast messages.'
+            );
+        }
+
         $push = $firebaseMessaging->sendUserNotification($notification);
 
         if (($push['skipped'] ?? false) === true) {
