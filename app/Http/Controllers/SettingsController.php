@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Profile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\App;
 use Illuminate\Validation\Rule;
 
 class SettingsController extends Controller
@@ -12,6 +13,14 @@ class SettingsController extends Controller
     private const LANGUAGES = [
         'en',
         'ms',
+    ];
+
+    private const TIMEZONES = [
+        'UTC',
+        'Asia/Brunei',
+        'Asia/Kuala_Lumpur',
+        'Asia/Singapore',
+        'Asia/Jakarta',
     ];
 
     private const FLOOD_TRIGGERS = [
@@ -34,8 +43,7 @@ class SettingsController extends Controller
 
         $settings = [
             'preferred_language' => (string) ($profile->preferred_language ?? 'en'),
-            'in_app_alerts' => (bool) ($preferences['in_app_alerts'] ?? true),
-            'sms_alerts' => (bool) ($preferences['sms_alerts'] ?? false),
+            'timezone' => (string) ($user->timezone ?: config('app.timezone', 'UTC')),
             'flood_trigger' => (string) ($preferences['flood_trigger'] ?? 'LEVEL 1 DETECTED'),
             'rain_trigger' => (string) ($preferences['rain_trigger'] ?? 'heavy_rain'),
             'flow_anomaly_percent' => (int) ($preferences['flow_anomaly_percent'] ?? 30),
@@ -49,6 +57,7 @@ class SettingsController extends Controller
             'user' => $user,
             'settings' => $settings,
             'languages' => self::LANGUAGES,
+            'timezones' => self::TIMEZONES,
             'floodTriggers' => self::FLOOD_TRIGGERS,
             'rainTriggers' => self::RAIN_TRIGGERS,
         ]);
@@ -58,8 +67,7 @@ class SettingsController extends Controller
     {
         $data = $request->validate([
             'preferred_language' => ['required', Rule::in(self::LANGUAGES)],
-            'in_app_alerts' => ['nullable', 'boolean'],
-            'sms_alerts' => ['nullable', 'boolean'],
+            'timezone' => ['required', Rule::in(self::TIMEZONES)],
             'flood_trigger' => ['required', Rule::in(self::FLOOD_TRIGGERS)],
             'rain_trigger' => ['required', Rule::in(self::RAIN_TRIGGERS)],
             'flow_anomaly_percent' => ['required', 'integer', 'min:5', 'max:200'],
@@ -77,10 +85,9 @@ class SettingsController extends Controller
         );
 
         $profile->preferred_language = $data['preferred_language'];
+        $user->timezone = $data['timezone'];
 
         $profile->preferences = [
-            'in_app_alerts' => (bool) ($data['in_app_alerts'] ?? false),
-            'sms_alerts' => (bool) ($data['sms_alerts'] ?? false),
             'flood_trigger' => $data['flood_trigger'],
             'rain_trigger' => $data['rain_trigger'],
             'flow_anomaly_percent' => (int) $data['flow_anomaly_percent'],
@@ -91,8 +98,10 @@ class SettingsController extends Controller
         ];
 
         $profile->save();
+        $user->save();
 
         $request->session()->put('locale', $data['preferred_language']);
+        App::setLocale($data['preferred_language']);
 
         return redirect()->route('account.settings.edit')->with('success', __('ui.settings_updated'));
     }

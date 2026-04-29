@@ -82,30 +82,30 @@
             <form method="POST" action="{{ route('account.settings.update') }}">
                 @csrf
 
-                <h2 class="text-lg font-bold text-blue-900 mb-3">{{ __('ui.notification_channels') }}</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-7">
-                    <label class="flex items-center gap-3 bg-sky-50 rounded-xl px-4 py-3">
-                        <input type="hidden" name="in_app_alerts" value="0">
-                        <input type="checkbox" name="in_app_alerts" value="1" {{ $settings['in_app_alerts'] ? 'checked' : '' }}>
-                        <span class="text-blue-900">{{ __('ui.in_app_alerts') }}</span>
-                    </label>
-                    <label class="flex items-center gap-3 bg-sky-50 rounded-xl px-4 py-3">
-                        <input type="hidden" name="sms_alerts" value="0">
-                        <input type="checkbox" name="sms_alerts" value="1" {{ $settings['sms_alerts'] ? 'checked' : '' }}>
-                        <span class="text-blue-900">{{ __('ui.sms_alerts') }}</span>
-                    </label>
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-7">
+                    <div>
+                        <label class="block mb-2 text-sm font-semibold text-blue-900">{{ __('ui.timezone') }}</label>
+                        <select name="timezone" class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                            @php $selectedTimezone = old('timezone', $settings['timezone']); @endphp
+                            @foreach($timezones as $timezone)
+                                <option value="{{ $timezone }}" {{ $selectedTimezone === $timezone ? 'selected' : '' }}>
+                                    {{ $timezone }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                <div class="mb-7">
-                    <label class="block mb-2 text-sm font-semibold text-blue-900">{{ __('ui.language') }}</label>
-                    <select name="preferred_language" class="w-full md:w-80 rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                        @php $selectedLanguage = old('preferred_language', $settings['preferred_language']); @endphp
-                        @foreach($languages as $language)
-                            <option value="{{ $language }}" {{ $selectedLanguage === $language ? 'selected' : '' }}>
-                                {{ $language === 'ms' ? __('ui.malay') : __('ui.english') }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div>
+                        <label class="block mb-2 text-sm font-semibold text-blue-900">{{ __('ui.language') }}</label>
+                        <select name="preferred_language" class="w-full rounded-xl border border-blue-200 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                            @php $selectedLanguage = old('preferred_language', $settings['preferred_language']); @endphp
+                            @foreach($languages as $language)
+                                <option value="{{ $language }}" {{ $selectedLanguage === $language ? 'selected' : '' }}>
+                                    {{ $language === 'ms' ? __('ui.malay') : __('ui.english') }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <h2 class="text-lg font-bold text-blue-900 mb-3">{{ __('ui.alert_thresholds') }}</h2>

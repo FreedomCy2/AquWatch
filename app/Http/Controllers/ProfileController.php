@@ -15,7 +15,11 @@ class ProfileController extends Controller
     ];
 
     private const TIMEZONES = [
+        'UTC',
         'Asia/Brunei',
+        'Asia/Kuala_Lumpur',
+        'Asia/Singapore',
+        'Asia/Jakarta',
     ];
 
     public function show()
