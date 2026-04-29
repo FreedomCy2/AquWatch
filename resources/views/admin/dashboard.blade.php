@@ -317,7 +317,16 @@
                 return;
             }
 
-            statusEl.textContent = floodLabel(String(latest.status ?? 'SAFE / DRY'));
+            const status = String(latest.status ?? 'SAFE / DRY');
+            if (status === 'CRITICAL' || status === 'FLASH FLOOD WARNING') {
+                statusEl.className = 'text-2xl font-bold text-rose-700';
+            } else if (status === 'NORMAL RISE' || status === 'LEVEL 1 DETECTED') {
+                statusEl.className = 'text-2xl font-bold text-yellow-500';
+            } else {
+                statusEl.className = 'text-2xl font-bold text-emerald-700';
+            }
+
+            statusEl.textContent = floodLabel(status);
             const recency = latest.is_recent ? 'Live' : 'Stale';
             metaEl.textContent = `Sensor: ${latest.sensor_id ?? '-'} | Rise: ${Number(latest.rise_time_sec ?? 0)}s | ${recency}`;
         }

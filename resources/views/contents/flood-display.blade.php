@@ -200,7 +200,7 @@
                 statusEl.className = 'text-2xl font-bold text-rose-700 mt-1';
             } else if (status === 'NORMAL RISE' || status === 'LEVEL 1 DETECTED') {
                 statusEl.textContent = toShortStatus(status);
-                statusEl.className = 'text-2xl font-bold text-amber-700 mt-1';
+                statusEl.className = 'text-2xl font-bold text-yellow-500 mt-1';
             } else {
                 statusEl.textContent = 'Safe / Dry';
                 statusEl.className = 'text-2xl font-bold text-emerald-700 mt-1';
