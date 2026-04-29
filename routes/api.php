@@ -3,6 +3,11 @@
 use App\Http\Controllers\FcmTokenController;
 use App\Http\Controllers\SensorIngestionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MobileAuthController;
+
+Route::post('/app-login', [MobileAuthController::class, 'login'])
+    ->middleware('throttle:10,1')
+    ->name('api.app-login');
 
 // Existing FCM endpoints (kept for backward compatibility)
 Route::post('/save-fcm-token', [FcmTokenController::class, 'store'])
