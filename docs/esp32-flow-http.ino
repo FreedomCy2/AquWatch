@@ -21,8 +21,8 @@
 #define SENSOR_B_PIN 26
 
 // Wi-Fi credentials
-const char* WIFI_SSID = "Freedom";
-const char* WIFI_PASSWORD = "aaaaaaaa";
+const char* WIFI_SSID = "Honor";
+const char* WIFI_PASSWORD = "indabulih";
 
 // Laravel API settings
 const char* API_URL = "https://aquwatch.org/api/ingest/flow";
