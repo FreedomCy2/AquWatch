@@ -15,8 +15,8 @@ const int GREEN_LED = 25;
 const int YELLOW_LED = 26;
 const int RED_LED = 27;
 
-const char* WIFI_SSID = "DecoA";
-const char* WIFI_PASSWORD = "315321TKB";
+const char* WIFI_SSID = "Freedom";
+const char* WIFI_PASSWORD = "aaaaaaaa";
 
 const char* API_URL = "https://aquwatch.org/api/ingest/flood";
 const char* SENSOR_TOKEN = "aqw_1f8d7a9b3c4e6f2a91d0b7e5c3a8f6d4b2c9e1a7f3d5b8c0";
