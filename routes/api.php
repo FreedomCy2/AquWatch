@@ -1,17 +1,14 @@
 <?php
 
-use App\Http\Controllers\FcmTokenController;
 use App\Http\Controllers\SensorIngestionController;
 use Illuminate\Support\Facades\Route;
 
-Route::post('/save-fcm-token', [FcmTokenController::class, 'store'])
-    ->middleware('throttle:60,1')
-    ->name('api.fcm-token.store');
+// NOTE: The Android app no longer uses a separate mobile login or a public
+// device-token endpoint. It relies on the VPS web login (shared WebView cookie)
+// and registers its FCM token through the authenticated web route
+// POST /fcm/token (see routes/web.php and resources/views/.../settings-edit.blade.php).
 
-Route::delete('/save-fcm-token', [FcmTokenController::class, 'destroy'])
-    ->middleware('throttle:60,1')
-    ->name('api.fcm-token.destroy');
-
+// Sensor ingestion (unchanged)
 Route::post('/ingest/flow', [SensorIngestionController::class, 'storeFlow'])
     ->middleware('throttle:sensor-ingest')
     ->name('api.ingest.flow');
